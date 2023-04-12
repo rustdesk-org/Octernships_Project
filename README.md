@@ -38,15 +38,27 @@ To participate, you must be:
 
 # Assignment
 
-## TASK-TITLE
+## Elevate priviledge to run a Linux command with Rust
+
+The starter code is included in this repository. ‼️
+
+### Setting up 🖥️
+
+* Prepare your Linux environment
+* Follow https://github.com/Desdaemon/flutter_rust_bridge_template/blob/main/README.md to get started
+* `flutter run -d linux`
+![image](https://user-images.githubusercontent.com/71636191/231404421-a203e923-0c51-42fd-9ee7-cea0ea44fdd9.png)
 
 ### Task instructions
 
-&lt;!--- Use this section to describe the project that students are required to complete. We ask that you also include instructions on running and preparing the students' local environment if necessary. --->
+Your task is to
+
+- Elevate priviledge to run `ls -la /root/` with Rust, and print the result on the Flutter window
 
 ### Task Expectations
 
-&lt;!--- Please add expectations that students need to follow to be considered. Some examples include: completing the project on their own, not using code from external resources without comprehending the logic, etc.  --->
+- Polkit is usually used by priviledge elevation on Linux
+- Polkit may be disabled or uninstalled on some system, you need to detect if polkit works well, and elevate priviledge with alterlative way
 
 ### Task submission
 
@@ -59,7 +71,7 @@ Students are expected to use the [GitHub Flow](https://docs.github.com/en/get-st
 
 ### Resources
 
-&lt;!--- Use this section to add resources for students to refer to. For example Documentation, Tutorials, Guides, and more.  --->
+https://github.com/rustdesk/rustdesk/issues/2756
 
 ## Questions
 We love to answer questions! We highly recommend learning by doing and looking up the questions before reaching out. If you were unable to find your solution on ChatGP / Google / Stack Overflow, please open a new discussion in this repository.
