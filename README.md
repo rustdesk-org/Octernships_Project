@@ -8,7 +8,7 @@ Virtual / remote desktop infrastructure for everyone! Open source TeamViewer / C
 
 ### Why participate in an Octernship with RustDesk
 
-We use Rust + Flutter and cover all platforms. [RustDesk](https://github.com/rustdesk/rustdesk) is a 40K+ GitHub Stars project.
+We use Rust + Flutter and cover all platforms. [RustDesk](https://github.com/rustdesk/rustdesk) is a 40K+ GitHub Stars project. You can learn Rust and Flutter very well here.
 
 ### Octernship role description
 
