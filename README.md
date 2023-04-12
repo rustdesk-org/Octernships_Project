@@ -1,61 +1,65 @@
-# flutter_rust_bridge_template
+# Information
 
-This repository serves as a template for Flutter projects calling into native Rust
-libraries via `flutter_rust_bridge`.
+![g9759](https://user-images.githubusercontent.com/71636191/231344372-2d47433c-699d-45ca-8cfc-4e67591319f7.png)
 
-## Getting Started
+### Company information 
 
-To begin, ensure that you have a working installation of the following items:
-- [Flutter SDK](https://docs.flutter.dev/get-started/install)
-- [Rust language](https://rustup.rs/)
-- `flutter_rust_bridge_codegen` [cargo package](https://cjycode.com/flutter_rust_bridge/integrate/deps.html#build-time-dependencies)
-- Appropriate [Rust targets](https://rust-lang.github.io/rustup/cross-compilation.html) for cross-compiling to your device
-- For Android targets:
-    - Install [cargo-ndk](https://github.com/bbqsrc/cargo-ndk#installing)
-    - Install [Android NDK 22](https://github.com/android/ndk/wiki/Unsupported-Downloads#r22b), then put its path in one of the `gradle.properties`, e.g.:
+Virtual / remote desktop infrastructure for everyone! Open source TeamViewer / Citrix alternative.
 
-```
-echo "ANDROID_NDK=.." >> ~/.gradle/gradle.properties
-```
+### Why participate in an Octernship with RustDesk
 
-- For iOS targets:
-  - Install [cargo-xcode](https://gitlab.com/kornelski/cargo-xcode#installation)
-- [Web dependencies](http://cjycode.com/flutter_rust_bridge/template/setup_web.html) for the Web
+We use Rust + Flutter and cover all platforms. [RustDesk](https://github.com/rustdesk/rustdesk) is a 40K+ GitHub Stars project.
 
-Then go ahead and run `flutter run` (for web, run `dart run flutter_rust_bridge:serve` instead). When you're ready, refer to our documentation
-[here](https://fzyzcjy.github.io/flutter_rust_bridge/index.html) to learn how to write and use binding code.
+### Octernship role description
 
-Once you have edited `api.rs` to incorporate your own Rust code, the bridge files `bridge_definitions.dart` and `bridge_generated.dart` are generated using the following command (note: append ` --wasm` to add web support):
+| Octernship info  | Timelines and Stipend |
+| ------------- | ------------- |
+| Assignment Deadline  | 29 April 2023  |
+| Octernship Duration  | 3 Months  |
+| Monthly Stipend  | $500 USD  |
 
-### Windows
-```
-flutter_rust_bridge_codegen --rust-input native\src\api.rs --dart-output .\lib\bridge_generated.dart --dart-decl-output .\lib\bridge_definitions.dart
-```
+### Recommended qualifications
 
-### Linux/MacOS/any other Unix
-```
-flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output ./lib/bridge_generated.dart --dart-decl-output ./lib/bridge_definitions.dart
-```
+- Experience with Git & GitHub
+- Experience with networking and basic Linux commands
+- Passion to learn Rust and Flutter
+- Passion for open source
+- Fast learner
 
-## Scaffolding in existing projects
+### Eligibility
 
-If you would like to generate boilerplate for using `flutter_rust_bridge` in your existing projects,
-check out the [`flutter_rust_bridge` brick](https://brickhub.dev/bricks/flutter_rust_bridge/)
-for more details.
+To participate, you must be:
 
-## Disclaimer
+* A [verified student](https://education.github.com/discount_requests/pack_application) on Global Campus
 
-This template is not affiliated with flutter_rust_bridge. Please file issues and PRs related to the template here,
-not flutter_rust_bridge.
+* 18 years or older
 
-## License
+* Active contributor on GitHub (monthly)
 
-Copyright 2022 Viet Dinh.
+# Assignment
 
-This template is licensed under either of
-- [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0) ([LICENSE-APACHE](LICENSE-APACHE))
-- [MIT license](https://opensource.org/licenses/MIT) ([LICENSE-MIT](LICENSE-MIT))
+## TASK-TITLE
 
-at your option.
+### Task instructions
 
-The [SPDX](https://spdx.dev/) license identifier for this project is `MIT OR Apache-2.0`.
+&lt;!--- Use this section to describe the project that students are required to complete. We ask that you also include instructions on running and preparing the students' local environment if necessary. --->
+
+### Task Expectations
+
+&lt;!--- Please add expectations that students need to follow to be considered. Some examples include: completing the project on their own, not using code from external resources without comprehending the logic, etc.  --->
+
+### Task submission
+
+Students are expected to use the [GitHub Flow](https://docs.github.com/en/get-started/quickstart/github-flow) when working on their project. 
+
+1. Creating a new branch
+2. Making changes on the new branch
+3. Creating a Pull Request to merge changes into main branch on or before the assignment deadline.
+3. Using GitHub Discussions to ask any relevant questions regarding the project
+
+### Resources
+
+&lt;!--- Use this section to add resources for students to refer to. For example Documentation, Tutorials, Guides, and more.  --->
+
+## Questions
+We love to answer questions! We highly recommend learning by doing and looking up the questions before reaching out. If you were unable to find your solution on ChatGP / Google / Stack Overflow, please open a new discussion in this repository.
