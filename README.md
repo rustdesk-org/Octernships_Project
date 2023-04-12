@@ -58,7 +58,7 @@ Your task is to
 ### Task Expectations
 
 - Polkit is usually used by priviledge elevation on Linux
-- Polkit may be disabled or uninstalled on some system, you need to detect if polkit works well, and elevate priviledge with alterlative way
+- Polkit may be disabled or uninstalled on some system, you need to detect if polkit works well, and elevate priviledge with alternative way
 
 ### Task submission
 
@@ -71,7 +71,7 @@ Students are expected to use the [GitHub Flow](https://docs.github.com/en/get-st
 
 ### Resources
 
-https://github.com/rustdesk/rustdesk/issues/2756
+* https://github.com/rustdesk/rustdesk/issues/2756
 
 ## Questions
 We love to answer questions! We highly recommend learning by doing and looking up the questions before reaching out. If you were unable to find your solution on ChatGP / Google / Stack Overflow, please open a new discussion in this repository.
