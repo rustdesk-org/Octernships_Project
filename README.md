@@ -1,6 +1,6 @@
 # Information
 
-![g9759](https://user-images.githubusercontent.com/71636191/231344372-2d47433c-699d-45ca-8cfc-4e67591319f7.png)
+![rustdesk-banner](https://user-images.githubusercontent.com/71636191/236513788-89da3f2a-6898-4e30-a12f-b5af129858c3.png)
 
 ### Company information 
 
@@ -14,7 +14,7 @@ We use Rust + Flutter and cover all platforms. [RustDesk](https://github.com/rus
 
 | Octernship info  | Timelines and Stipend |
 | ------------- | ------------- |
-| Assignment Deadline  | 29 April 2023  |
+| Assignment Deadline  | 1 June 2023  |
 | Octernship Duration  | 3 Months  |
 | Monthly Stipend  | $500 USD  |
 
