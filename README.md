@@ -74,4 +74,4 @@ Students are expected to use the [GitHub Flow](https://docs.github.com/en/get-st
 * https://github.com/rustdesk/rustdesk/issues/2756
 
 ## Questions
-We love to answer questions! We highly recommend learning by doing and looking up the questions before reaching out. If you were unable to find your solution on ChatGP / Google / Stack Overflow, please open a new discussion in this repository.
+We love to answer questions! We highly recommend learning by doing and looking up the questions before reaching out. If you were unable to find your solution on ChatGPT / Google / Stack Overflow, please open a new discussion in this repository.
