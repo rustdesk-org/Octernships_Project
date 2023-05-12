@@ -1,9 +1,7 @@
-// This is the entry point of your Rust library.
-// When adding new code to your project, note that only items used
-// here will be transformed to their Dart equivalents.
-use std::process::{Command, exit};
-use std::io;
+use std::process::{Command};
 use std::str;
+use anyhow::Result;
+use anyhow::Context;
 
 // A plain enum without any fields. This is similar to Dart- or C-style enums.
 // flutter_rust_bridge is capable of generating code for enums with fields
@@ -61,33 +59,16 @@ pub fn rust_release_mode() -> bool {
     cfg!(not(debug_assertions))
 }
 
-pub fn list_root() -> io::Result<Vec<String>> {
-    // 首先，检查是否安装了 polkit
-    let check_polkit = Command::new("which").arg("pkexec").output()?;
-    if check_polkit.status.success() {
-        // 如果安装了 polkit，使用 pkexec 提升权限运行 ls 命令
-        let output = Command::new("pkexec").arg("ls").arg("-la").arg("/root").output()?;
-        return process_output(output);
-    }
-
-    // 如果没有安装 polkit，尝试使用 sudo
-    let check_sudo = Command::new("which").arg("sudo").output()?;
-    if check_sudo.status.success() {
-        // 如果安装了 sudo，使用 sudo 提升权限运行 ls 命令
-        let output = Command::new("sudo").arg("ls").arg("-la").arg("/root").output()?;
-        return process_output(output);
-    }
-
-    // 如果都没有安装，返回错误
-    Err(io::Error::new(io::ErrorKind::Other, "Neither polkit nor sudo is available."))
-}
-
-fn process_output(output: std::process::Output) -> io::Result<Vec<String>> {
-    if output.status.success() {
-        let s = str::from_utf8(&output.stdout).map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "Invalid UTF-8"))?;
-        let lines: Vec<String> = s.lines().map(|s| s.to_string()).collect();
-        return Ok(lines);
-    } else {
-        return Err(io::Error::new(io::ErrorKind::Other, "Command failed."));
-    }
+// 执行ls -la ~，将返回的条目以列表的形式返回
+pub fn ls() -> Result<Vec<String>> {
+    let output = Command::new("pkexec")
+        .arg("ls")
+        .arg("-la")
+        .arg("/root")
+        .output()
+        .context("Failed to execute ls")?;
+    let stdout = str::from_utf8(&output.stdout).context("Failed to parse ls output")?;
+    // 把获取到的东西在控制台打印一个日志出来
+    println!("{}", stdout);
+    Ok(stdout.lines().map(|s| s.to_owned()).collect())
 }
