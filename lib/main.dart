@@ -36,12 +36,28 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text("ls -la /root/", style: TextStyle(fontSize: 40.0)),
-            const Text('Run above cmd with Rust and print the output here'),
-          ],
+        // 使用 FutureBuilder 显示异步任务的结果
+        child: FutureBuilder<List<String>>(
+          // 调用 api.ls() 方法获取文件列表
+          future: api.ls(),
+          builder: (context, snap) {
+            if (snap.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator(); // 显示加载指示器
+            } else if (snap.hasError) {
+              return Text("Error: ${snap.error}"); // 显示错误信息
+            } else {
+              // 处理返回的 List<String> 结果
+              List<String>? rootList = snap.data;
+              return ListView.builder(
+                itemCount: rootList!.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return ListTile(
+                    title: Text(rootList[index]),
+                  );
+                },
+              );
+            }
+          },
         ),
       ),
     );
