@@ -29,36 +29,67 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  late Future<List<String>> _futureFiles;
+
+  @override
+  // 初始化文件列表
+  void initState() {
+    super.initState();
+    _futureFiles = api.ls();
+  }
+
+  // 更新条目
+  void _refreshFiles() {
+    setState(() {
+      _futureFiles = api.ls();
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        // 使用 FutureBuilder 显示异步任务的结果
-        child: FutureBuilder<List<String>>(
-          // 调用 api.ls() 方法获取文件列表
-          future: api.ls(),
-          builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator(); // 显示加载指示器
-            } else if (snap.hasError) {
-              return Text("Error: ${snap.error}"); // 显示错误信息
-            } else {
-              // 处理返回的 List<String> 结果
-              List<String>? rootList = snap.data;
-              return ListView.builder(
-                itemCount: rootList!.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    title: Text(rootList[index]),
-                  );
-                },
-              );
-            }
-          },
-        ),
+      // 通过FutureBuilder来构建列表
+      body: FutureBuilder<List<String>>(
+        future: _futureFiles,
+        builder: (context, snap) {
+          if (snap.connectionState == ConnectionState.waiting) {
+            // 等待提权或加载，显示一个旋转的加载条
+            return Center(child: CircularProgressIndicator());
+          } else if (snap.hasError) {
+            // 如果文件获取错误，显示错误信息
+            return Center(child: Text("Error: ${snap.error}"));
+          } else {
+            // 文件获取成功，加载文件列表
+            List<String>? rootList = snap.data;
+            // 使用ListView.builder来打印rootList内所有的成员
+            return ListView.builder(
+              itemCount: rootList!.length,
+              itemBuilder: (context, index) {
+                // 以Card的形式返回条目
+                return Card(
+                  elevation: 4.0,
+                  margin: EdgeInsets.all(8.0),
+                  child: ListTile(
+                    title: Text(
+                      rootList[index],
+                      style: TextStyle(
+                          fontSize: 16.0, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+        },
+      ),
+      // 在右下角添加一个按钮，点击后刷新列表
+      floatingActionButton: FloatingActionButton(
+        onPressed: _refreshFiles,
+        tooltip: 'Refresh',
+        child: Icon(Icons.refresh),
       ),
     );
   }
