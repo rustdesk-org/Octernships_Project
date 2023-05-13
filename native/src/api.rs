@@ -1,7 +1,7 @@
 use std::process::{Command};
-use std::str;
-use anyhow::Result;
-use anyhow::Context;
+use std::path::Path;
+use anyhow::{Result, anyhow};
+
 
 // A plain enum without any fields. This is similar to Dart- or C-style enums.
 // flutter_rust_bridge is capable of generating code for enums with fields
@@ -59,16 +59,51 @@ pub fn rust_release_mode() -> bool {
     cfg!(not(debug_assertions))
 }
 
-// 执行ls -la ~，将返回的条目以列表的形式返回
+// 执行ls -la /root，将返回的条目以列表的形式返回
 pub fn ls() -> Result<Vec<String>> {
-    let output = Command::new("pkexec")
-        .arg("ls")
+    // 检查/root目录是否存在
+    if !Path::new("/root").exists() {
+        return Err(anyhow!("/root/ folder does not exist."));
+    }
+
+    // 直接执行指令，如果有权限的话直接返回结果 
+    let output = Command::new("ls")
         .arg("-la")
         .arg("/root")
         .output()
-        .context("Failed to execute ls")?;
-    let stdout = str::from_utf8(&output.stdout).context("Failed to parse ls output")?;
-    // 把获取到的东西在控制台打印一个日志出来
-    println!("{}", stdout);
-    Ok(stdout.lines().map(|s| s.to_owned()).collect())
+        .expect("No access permission to the /root directory.");
+
+    // 如果失败，代表用户自己没有权限访问root，尝试使用pkexec提权执行命令
+    if !output.status.success() {
+
+        // 执行提权
+        let output = Command::new("pkexec")
+            .arg("ls")
+            .arg("-la")
+            .arg("/root")
+            .output()
+            .expect("Failed to elevate privileges using pkexec.");
+
+        // 使用pkcheck检测agent是否有效，如果无效的话则返回polkit的agent并没有工作正常
+        // let has_agent = Command::new("pkcheck")
+        //     .arg("--action-id")
+        //     .arg("org.freedesktop.policykit.exec")
+        //     .output()
+        //     .expect("Failed to check if polkit agent is working."); 
+
+        // if !has_agent.status.success() {
+        //     return Err(anyhow!("Polkit agent is not working."));
+        // } 
+
+        // 使用pkexec提权失败
+        if !output.status.success() {
+            return Err(anyhow!("Permission Denied"));
+        }
+
+        let output_str = String::from_utf8(output.stdout)?;
+        return Ok(output_str.lines().map(String::from).collect());
+    }
+
+    let output_str = String::from_utf8(output.stdout)?;
+    Ok(output_str.lines().map(String::from).collect())
 }
