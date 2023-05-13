@@ -35,13 +35,13 @@ class _MyHomePageState extends State<MyHomePage> {
   // 初始化文件列表
   void initState() {
     super.initState();
-    _futureFiles = api.ls();
+    _futureFiles = api.lsRoot();
   }
 
   // 更新条目
   void _refreshFiles() {
     setState(() {
-      _futureFiles = api.ls();
+      _futureFiles = api.lsRoot();
     });
   }
   

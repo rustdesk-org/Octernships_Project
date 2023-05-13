@@ -19,9 +19,9 @@ abstract class Native {
 
   FlutterRustBridgeTaskConstMeta get kRustReleaseModeConstMeta;
 
-  Future<List<String>> ls({dynamic hint});
+  Future<List<String>> lsRoot({dynamic hint});
 
-  FlutterRustBridgeTaskConstMeta get kLsConstMeta;
+  FlutterRustBridgeTaskConstMeta get kLsRootConstMeta;
 }
 
 enum Platform {
@@ -76,19 +76,19 @@ class NativeImpl implements Native {
         argNames: [],
       );
 
-  Future<List<String>> ls({dynamic hint}) {
+  Future<List<String>> lsRoot({dynamic hint}) {
     return _platform.executeNormal(FlutterRustBridgeTask(
-      callFfi: (port_) => _platform.inner.wire_ls(port_),
+      callFfi: (port_) => _platform.inner.wire_ls_root(port_),
       parseSuccessData: _wire2api_StringList,
-      constMeta: kLsConstMeta,
+      constMeta: kLsRootConstMeta,
       argValues: [],
       hint: hint,
     ));
   }
 
-  FlutterRustBridgeTaskConstMeta get kLsConstMeta =>
+  FlutterRustBridgeTaskConstMeta get kLsRootConstMeta =>
       const FlutterRustBridgeTaskConstMeta(
-        debugName: "ls",
+        debugName: "ls_root",
         argNames: [],
       );
 
@@ -264,17 +264,17 @@ class NativeWire implements FlutterRustBridgeWireBase {
   late final _wire_rust_release_mode =
       _wire_rust_release_modePtr.asFunction<void Function(int)>();
 
-  void wire_ls(
+  void wire_ls_root(
     int port_,
   ) {
-    return _wire_ls(
+    return _wire_ls_root(
       port_,
     );
   }
 
-  late final _wire_lsPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>('wire_ls');
-  late final _wire_ls = _wire_lsPtr.asFunction<void Function(int)>();
+  late final _wire_ls_rootPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>('wire_ls_root');
+  late final _wire_ls_root = _wire_ls_rootPtr.asFunction<void Function(int)>();
 
   void free_WireSyncReturn(
     WireSyncReturn ptr,

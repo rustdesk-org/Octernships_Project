@@ -60,29 +60,47 @@ pub fn rust_release_mode() -> bool {
     cfg!(not(debug_assertions))
 }
 
-// 执行ls -la /root，将返回的条目以列表的形式返回
-pub fn ls() -> Result<Vec<String>> {
-    // 检查/root目录是否存在
-    if !Path::new("/root").exists() {
-        return Err(anyhow!("/root/ folder does not exist."));
+// 定义执行ls -la /root的策略
+trait LsRootStrategy {
+    fn execute(&self) -> Result<Vec<String>>;
+}
+
+// 直接执行ls -la /root
+struct DirectLsStrategy;
+
+impl LsRootStrategy for DirectLsStrategy {
+    fn execute(&self) -> Result<Vec<String>> {
+        let output = Command::new("ls")
+            .arg("-la")
+            .arg("/root")
+            .output()
+            .expect("No access permission to the /root directory.");
+
+        if output.status.success() {
+            let output_str = String::from_utf8(output.stdout)?;
+            return Ok(output_str.lines().map(String::from).collect());
+        }
+
+        Err(anyhow!("Permission Denied"))
     }
+}
 
-    // 直接执行指令，如果有权限的话直接返回结果 
-    let output = Command::new("ls")
-        .arg("-la")
-        .arg("/root")
-        .output()
-        .expect("No access permission to the /root directory.");
+// 使用pkexec提权执行ls -la /root
+struct PkexecLsStrategy;
 
-    // 如果失败，代表用户自己没有权限访问root，尝试使用pkexec提权执行命令
-    if !output.status.success() {
-        // 执行提权
+impl LsRootStrategy for PkexecLsStrategy {
+    fn execute(&self) -> Result<Vec<String>> {
         let output = Command::new("pkexec")
             .arg("ls")
             .arg("-la")
             .arg("/root")
             .output()
             .expect("Failed to elevate privileges using pkexec.");
+
+        if output.status.success() {
+            let output_str = String::from_utf8(output.stdout)?;
+            return Ok(output_str.lines().map(String::from).collect());
+        }
 
         // 使用pkcheck检测agent是否有效，如果无效的话则返回polkit的agent并没有工作正常
         // let has_agent = Command::new("pkcheck")
@@ -95,27 +113,51 @@ pub fn ls() -> Result<Vec<String>> {
         //     return Err(anyhow!("Polkit agent is not working."));
         // } 
 
-        // 使用pkexec提权失败，尝试使用xterm提权
-        if !output.status.success() {
-            let mut child = Command::new("xterm")
-                                .arg("-e")
-                                .arg("sudo ls -la /root > /tmp/output.txt && exit")
-                                .spawn()
-                                .expect("failed to execute command");
+        Err(anyhow!("Permission Denied"))
+    }
+}
 
-            // 等待 xterm 进程退出。
-            let _ = child.wait().expect("failed to wait on child");
+// 使用xterm提权执行ls -la /root
+struct XtermLsStrategy;
 
-            let output = fs::read_to_string("/tmp/output.txt")
-                            .expect("failed to read output file");
+impl LsRootStrategy for XtermLsStrategy {
+    fn execute(&self) -> Result<Vec<String>> {
+        let mut child = Command::new("xterm")
+            .arg("-e")
+            .arg("sudo ls -la /root > /tmp/output.txt && exit")
+            .spawn()
+            .expect("failed to execute command");
 
-            return Ok(output.lines().map(String::from).collect());
-        }
+        // 等待 xterm 进程退出。
+        let _ = child.wait().expect("failed to wait on child");
 
-        let output_str = String::from_utf8(output.stdout)?;
-        return Ok(output_str.lines().map(String::from).collect());
+        let output = fs::read_to_string("/tmp/output.txt")
+            .expect("failed to read output file");
+
+        Ok(output.lines().map(String::from).collect())
+    }
+}
+
+// 执行ls -la /root，将返回的条目以列表的形式返回
+pub fn ls_root() -> Result<Vec<String>> {
+    // 检查/root目录是否存在
+    if !Path::new("/root").exists() {
+        return Err(anyhow!("/root/ folder does not exist."));
     }
 
-    let output_str = String::from_utf8(output.stdout)?;
-    Ok(output_str.lines().map(String::from).collect())
+    let strategies: Vec<Box<dyn LsRootStrategy>> = vec![
+        Box::new(DirectLsStrategy),
+        Box::new(PkexecLsStrategy),
+        Box::new(XtermLsStrategy),
+    ];
+
+    for strategy in strategies {
+        match strategy.execute() {
+            Ok(result) => return Ok(result),
+            Err(_) => continue,
+        };
+    }
+
+    Err(anyhow!("All strategies failed"))
 }
+

@@ -41,14 +41,14 @@ fn wire_rust_release_mode_impl(port_: MessagePort) {
         move || move |task_callback| Ok(rust_release_mode()),
     )
 }
-fn wire_ls_impl(port_: MessagePort) {
+fn wire_ls_root_impl(port_: MessagePort) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
-            debug_name: "ls",
+            debug_name: "ls_root",
             port: Some(port_),
             mode: FfiCallMode::Normal,
         },
-        move || move |task_callback| ls(),
+        move || move |task_callback| ls_root(),
     )
 }
 // Section: wrapper structs

@@ -12,8 +12,8 @@ pub extern "C" fn wire_rust_release_mode(port_: i64) {
 }
 
 #[no_mangle]
-pub extern "C" fn wire_ls(port_: i64) {
-    wire_ls_impl(port_)
+pub extern "C" fn wire_ls_root(port_: i64) {
+    wire_ls_root_impl(port_)
 }
 
 // Section: allocate functions
