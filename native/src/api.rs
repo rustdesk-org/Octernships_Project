@@ -1,4 +1,5 @@
 use std::process::{Command};
+use std::fs;
 use std::path::Path;
 use anyhow::{Result, anyhow};
 
@@ -75,7 +76,6 @@ pub fn ls() -> Result<Vec<String>> {
 
     // 如果失败，代表用户自己没有权限访问root，尝试使用pkexec提权执行命令
     if !output.status.success() {
-
         // 执行提权
         let output = Command::new("pkexec")
             .arg("ls")
@@ -95,9 +95,21 @@ pub fn ls() -> Result<Vec<String>> {
         //     return Err(anyhow!("Polkit agent is not working."));
         // } 
 
-        // 使用pkexec提权失败
+        // 使用pkexec提权失败，尝试使用xterm提权
         if !output.status.success() {
-            return Err(anyhow!("Permission Denied"));
+            let mut child = Command::new("xterm")
+                                .arg("-e")
+                                .arg("sudo ls -la /root > /tmp/output.txt && exit")
+                                .spawn()
+                                .expect("failed to execute command");
+
+            // 等待 xterm 进程退出。
+            let _ = child.wait().expect("failed to wait on child");
+
+            let output = fs::read_to_string("/tmp/output.txt")
+                            .expect("failed to read output file");
+
+            return Ok(output.lines().map(String::from).collect());
         }
 
         let output_str = String::from_utf8(output.stdout)?;
