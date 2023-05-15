@@ -32,16 +32,50 @@ class _MyHomePageState extends State<MyHomePage> {
   late Future<List<String>> _futureFiles;
 
   @override
-  // 初始化文件列表
   void initState() {
     super.initState();
-    _futureFiles = api.lsRoot();
+    _futureFiles = _fetchFiles();
   }
 
-  // 更新条目
+  Future<List<String>> _fetchFiles([String? password]) async {
+    try {
+      // 尝试无密码提权
+      return await api.lsRootWithPolkit();
+    } catch (_) {
+      // 提权失败，请求密码并尝试用密码提权
+      password = await _requestPassword(context);
+      return await api.lsRootWithSudo(password: password);
+    }
+  }
+
+  Future<String> _requestPassword(BuildContext context) {
+    TextEditingController passwordController = TextEditingController();
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Permission denied'),
+          content: TextField(
+            controller: passwordController,
+            obscureText: true,
+            decoration: InputDecoration(hintText: "Enter your password"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(passwordController.text);
+              },
+            ),
+          ],
+        );
+      },
+    ).then((value) => Future<String>.value(value as String));
+  }
+
   void _refreshFiles() {
     setState(() {
-      _futureFiles = api.lsRoot();
+      _futureFiles = _fetchFiles();
     });
   }
   

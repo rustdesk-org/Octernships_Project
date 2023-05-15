@@ -1,5 +1,5 @@
 use std::process::{Command};
-use std::{fs, any};
+use std::{fs};
 use std::path::Path;
 use anyhow::{Result, anyhow};
 
@@ -116,7 +116,7 @@ struct SudoLsStrategy {
 
 impl LsRootStrategy for SudoLsStrategy {
     fn execute(&self) -> Result<Vec<String>> {
-        if let password = &self.password {
+            let password = &self.password;
             let echo_cmd = format!("echo {}", password);
             let output = Command::new("sh")
                 .arg("-c")
@@ -130,7 +130,7 @@ impl LsRootStrategy for SudoLsStrategy {
 
                 return Ok(output.lines().map(String::from).collect());
             }
-        }
+        
 
         Err(anyhow!("Password is required"))
     }
