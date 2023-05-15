@@ -1,5 +1,5 @@
 use std::process::{Command};
-use std::fs;
+use std::{fs, any};
 use std::path::Path;
 use anyhow::{Result, anyhow};
 
@@ -74,7 +74,8 @@ impl LsRootStrategy for DirectLsStrategy {
             .arg("-la")
             .arg("/root")
             .output()
-            .expect("No access permission to the /root directory.");
+            // 没有权限并不会被Command output判断为错误并退出
+            .expect("Failed to execute ls -la /root");
 
         if output.status.success() {
             let output_str = String::from_utf8(output.stdout)?;
@@ -90,56 +91,53 @@ struct PkexecLsStrategy;
 
 impl LsRootStrategy for PkexecLsStrategy {
     fn execute(&self) -> Result<Vec<String>> {
-        let output = Command::new("pkexec")
+        match Command::new("pkexec")
             .arg("ls")
             .arg("-la")
             .arg("/root")
-            .output()
-            .expect("Failed to elevate privileges using pkexec.");
+            .output() {
+            Ok(output) => {
+                if output.status.success() {
+                    let output_str = String::from_utf8(output.stdout)?;
+                    return Ok(output_str.lines().map(String::from).collect());
+                }
+                Err(anyhow!("Permission Denied"))
+            }
+            // 如果没有找到pkexec的话手动处理执行失败，以便于执行下面的sudo方案
+            Err(_) => Err(anyhow!("Failed to elevate privileges using pkexec."))
+        }
+    }
+}
 
-        if output.status.success() {
-            let output_str = String::from_utf8(output.stdout)?;
-            return Ok(output_str.lines().map(String::from).collect());
+// 使用sudo -S提权执行ls -la /root
+struct SudoLsStrategy {
+    password: String,
+}
+
+impl LsRootStrategy for SudoLsStrategy {
+    fn execute(&self) -> Result<Vec<String>> {
+        if let password = &self.password {
+            let echo_cmd = format!("echo {}", password);
+            let output = Command::new("sh")
+                .arg("-c")
+                .arg(format!("{} | sudo -S ls -la /root > /tmp/output.txt", echo_cmd))
+                .output()
+                .expect("Failed to elevate privileges using sudo.");
+
+            if output.status.success() {
+                let output = fs::read_to_string("/tmp/output.txt")
+                    .expect("Failed to read output file");
+
+                return Ok(output.lines().map(String::from).collect());
+            }
         }
 
-        // 使用pkcheck检测agent是否有效，如果无效的话则返回polkit的agent并没有工作正常
-        // let has_agent = Command::new("pkcheck")
-        //     .arg("--action-id")
-        //     .arg("org.freedesktop.policykit.exec")
-        //     .output()
-        //     .expect("Failed to check if polkit agent is working."); 
-
-        // if !has_agent.status.success() {
-        //     return Err(anyhow!("Polkit agent is not working."));
-        // } 
-
-        Err(anyhow!("Permission Denied"))
+        Err(anyhow!("Password is required"))
     }
 }
 
-// 使用xterm提权执行ls -la /root
-struct XtermLsStrategy;
-
-impl LsRootStrategy for XtermLsStrategy {
-    fn execute(&self) -> Result<Vec<String>> {
-        let mut child = Command::new("xterm")
-            .arg("-e")
-            .arg("sudo ls -la /root > /tmp/output.txt && exit")
-            .spawn()
-            .expect("failed to execute command");
-
-        // 等待 xterm 进程退出。
-        let _ = child.wait().expect("failed to wait on child");
-
-        let output = fs::read_to_string("/tmp/output.txt")
-            .expect("failed to read output file");
-
-        Ok(output.lines().map(String::from).collect())
-    }
-}
-
-// 执行ls -la /root，将返回的条目以列表的形式返回
-pub fn ls_root() -> Result<Vec<String>> {
+// 直接或使用polkit尝试获取ls_root的结果
+pub fn ls_root_with_polkit() -> Result<Vec<String>> {
     // 检查/root目录是否存在
     if !Path::new("/root").exists() {
         return Err(anyhow!("/root/ folder does not exist."));
@@ -148,7 +146,6 @@ pub fn ls_root() -> Result<Vec<String>> {
     let strategies: Vec<Box<dyn LsRootStrategy>> = vec![
         Box::new(DirectLsStrategy),
         Box::new(PkexecLsStrategy),
-        Box::new(XtermLsStrategy),
     ];
 
     for strategy in strategies {
@@ -158,6 +155,18 @@ pub fn ls_root() -> Result<Vec<String>> {
         };
     }
 
-    Err(anyhow!("All strategies failed"))
+    // 使用polkit访问失败
+    Err(anyhow!("Failed to elevate privileges using polkit."))
+}
+
+// 执行ls -la /root，将返回的条目以列表的形式返回，试图使用给定的密码
+pub fn ls_root_with_sudo(password: String) -> Result<Vec<String>> {
+    // 检查/root目录是否存在
+    if !Path::new("/root").exists() {
+        return Err(anyhow!("/root/ folder does not exist."));
+    }
+
+    let strategy = SudoLsStrategy { password };
+    strategy.execute().map_err(|_| anyhow!("Failed to elevate privileges using sudo."))
 }
 
