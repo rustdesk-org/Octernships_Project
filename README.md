@@ -47,12 +47,13 @@ cargo run
 ```
 cd FrontEnd/octernship_ui
 ```
-7) Now start the flutter project in debug mode on Linux machine using - 
+7) Run ```pub get``` to download the required flutter dependencies i.e. http
+8) Now start the flutter project in debug mode on Linux machine using - 
 ```
 flutter run -d linux
 ```
-8) Once the flutter App starts, It will automatically send a Get Request on the Rust local Server which will then run the Command in the terminal.
-9) Now Navigate to the terminal where the RUst BackEnd is active and you'll be asked the password for elevating the user. Enter the Password and Click Enter.
-10) Now Navigate to the Flutter app and you'll see the output displayed on the HomeScreen as required.
+9) Once the flutter App starts, It will automatically send a Get Request on the Rust local Server which will then run the Command in the terminal.
+10) Now Navigate to the terminal where the RUst BackEnd is active and you'll be asked the password for elevating the user. Enter the Password and Click Enter.
+11) Now Navigate to the Flutter app and you'll see the output displayed on the HomeScreen as required.
 
 <h1> Thanks </h1>
