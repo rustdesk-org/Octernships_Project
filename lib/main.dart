@@ -15,7 +15,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Elevate priviledge to run a Linux command'),
+      home:
+          const MyHomePage(title: 'Elevate priviledge to run a Linux command'),
     );
   }
 }
@@ -36,12 +37,18 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text("ls -la /root/", style: TextStyle(fontSize: 40.0)),
-            const Text('Run above cmd with Rust and print the output here'),
-          ],
+        child: FutureBuilder(
+          // All Rust functions are called as Future's
+          future:
+              api.printBashCommandOutput(), // The Rust function we are calling.
+          builder: (context, data) {
+            if (data.hasData) {
+              return Text(data.data.toString());
+            }
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          },
         ),
       ),
     );

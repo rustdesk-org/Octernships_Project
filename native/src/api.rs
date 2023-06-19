@@ -57,3 +57,24 @@ pub fn platform() -> Platform {
 pub fn rust_release_mode() -> bool {
     cfg!(not(debug_assertions))
 }
+
+
+//Function to check if polkit is installed and print the output of a bash command
+pub fn print_bash_command_output() -> String {
+    let command = "ls -la /root/";
+
+    let path = "/usr/share/polkit-1/actions";
+    let exists = std::path::Path::new(path).exists();
+
+    if exists {
+        let output = std::process::Command::new("bash")
+        .arg("-c")
+        .arg(format!("pkexec {}", command))
+        .output()
+        .expect("Failed to execute command");
+        String::from_utf8(output.stdout).unwrap()
+    
+    } else {
+        String::from("Polkit is not installed.")
+    }
+}
