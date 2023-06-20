@@ -37,6 +37,7 @@ dependencies:
   ffi: ^2.0.1
   flutter_rust_bridge: ^1.45.0
   meta: ^1.8.0
+  process_run: 
 
 dev_dependencies:
   flutter_test:
