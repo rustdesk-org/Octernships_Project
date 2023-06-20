@@ -1,59 +1,115 @@
-// This is the entry point of your Rust library.
-// When adding new code to your project, note that only items used
-// here will be transformed to their Dart equivalents.
+use anyhow::Result;
+use std::{
+    io::Write,
+    process::{Command, Stdio},
+};
+use thiserror::Error;
 
-// A plain enum without any fields. This is similar to Dart- or C-style enums.
-// flutter_rust_bridge is capable of generating code for enums with fields
-// (@freezed classes in Dart and tagged unions in C).
-pub enum Platform {
+/// Errors that can occur when listing a directory.
+#[derive(Error, Debug)]
+pub enum DirectoryListingError {
+    #[error("Authentication failed.")]
+    FailedToAuthenticate,
+    #[error("The directory was unable to be found.")]
+    NoSuchDirectory,
+    #[error("Inadequate permissions.")]
+    PermissionDenied,
+    #[error("An unknown error occured.")]
     Unknown,
-    Android,
-    Ios,
-    Windows,
-    Unix,
-    MacIntel,
-    MacApple,
-    Wasm,
 }
 
-// A function definition in Rust. Similar to Dart, the return type must always be named
-// and is never inferred.
-pub fn platform() -> Platform {
-    // This is a macro, a special expression that expands into code. In Rust, all macros
-    // end with an exclamation mark and can be invoked with all kinds of brackets (parentheses,
-    // brackets and curly braces). However, certain conventions exist, for example the
-    // vector macro is almost always invoked as vec![..].
-    //
-    // The cfg!() macro returns a boolean value based on the current compiler configuration.
-    // When attached to expressions (#[cfg(..)] form), they show or hide the expression at compile time.
-    // Here, however, they evaluate to runtime values, which may or may not be optimized out
-    // by the compiler. A variety of configurations are demonstrated here which cover most of
-    // the modern oeprating systems. Try running the Flutter application on different machines
-    // and see if it matches your expected OS.
-    //
-    // Furthermore, in Rust, the last expression in a function is the return value and does
-    // not have the trailing semicolon. This entire if-else chain forms a single expression.
-    if cfg!(windows) {
-        Platform::Windows
-    } else if cfg!(target_os = "android") {
-        Platform::Android
-    } else if cfg!(target_os = "ios") {
-        Platform::Ios
-    } else if cfg!(all(target_os = "macos", target_arch = "aarch64")) {
-        Platform::MacApple
-    } else if cfg!(target_os = "macos") {
-        Platform::MacIntel
-    } else if cfg!(target_family = "wasm") {
-        Platform::Wasm
-    } else if cfg!(unix) {
-        Platform::Unix
-    } else {
-        Platform::Unknown
+/// Possible methods for privilege escalation.
+#[derive(Copy, Clone)]
+pub enum EscalationMethod {
+    Polkit,
+    Sudo,
+    Su,
+    None,
+}
+
+/// Gets the current user's username.
+pub fn get_username() -> String {
+    let output = Command::new("whoami")
+        .output()
+        .expect("failed to execute whoami");
+
+    String::from_utf8(output.stdout).expect("failed to convert whoami output to string")
+}
+
+/// Gets the possible privilege escalation methods by checking for the existence of
+/// `pkexec`, `sudo`, and `su` in that order.
+pub fn determine_escalation_methods() -> Vec<EscalationMethod> {
+    // check for polkit, sudo, su in that order
+    let mut results = Vec::new();
+
+    let sudo = Command::new("command")
+        .args(["-v", "sudo"])
+        .stdout(Stdio::null())
+        .status()
+        .expect("failed to spawn command -v sudo");
+
+    if Some(0) == sudo.code() {
+        // sudo exists
+        results.push(EscalationMethod::Sudo);
     }
+
+    return results;
 }
 
-// The convention for Rust identifiers is the snake_case,
-// and they are automatically converted to camelCase on the Dart side.
-pub fn rust_release_mode() -> bool {
-    cfg!(not(debug_assertions))
+/// Gets the contents of `/root` using the specified privilege escalation method.
+/// - Returns an `Ok<String>` if `ls` has a 0 exit code
+/// - Returns an `Err<DirectoryListingError>` otherwise
+///
+/// The error returned is one of the following:
+/// - `DirectoryListingError::FailedToAuthenticate` if sudo exits with 1
+/// - `DirectoryListingError::NoSuchDirectory` if ls exits with 2 and the error message contains "No such file or directory"
+/// - `DirectoryListingError::PermissionDenied` if ls exits with 2 and the error message contains "Permission denied"
+/// - `DirectoryListingError::Unknown` otherwise
+pub fn get_directory_listing(method: EscalationMethod, password: Option<String>) -> Result<String> {
+    match method {
+        EscalationMethod::Sudo => {
+            let password = password.expect("password is required for sudo");
+
+            let mut sudo = Command::new("sudo")
+                .args(["-k", "-S", "ls", "-la", "/root"])
+                .stdin(Stdio::piped())
+                .stderr(Stdio::piped())
+                .stdout(Stdio::piped())
+                .spawn()
+                .expect("failed to run sudo");
+
+            sudo.stdin
+                .take()
+                .expect("failed to take stdin")
+                .write_all(password.as_bytes())
+                .expect("failed to write password to sudo");
+
+            let output = sudo.wait_with_output().expect("failed to wait on sudo");
+
+            match output.status.code() {
+                // ls successful
+                Some(0) => Ok(String::from_utf8(output.stdout)
+                    .expect("failed to convert sudo output to string")),
+
+                // sudo failed
+                Some(1) => Err(DirectoryListingError::FailedToAuthenticate.into()),
+
+                // ls failed
+                Some(2) => {
+                    if String::from_utf8(output.stderr)
+                        .expect("failed to convert ls output to string")
+                        .contains("Permission denied")
+                    {
+                        Err(DirectoryListingError::PermissionDenied.into())
+                    } else {
+                        Err(DirectoryListingError::NoSuchDirectory.into())
+                    }
+                }
+
+                _ => Err(DirectoryListingError::Unknown.into()),
+            }
+        }
+
+        _ => todo!(),
+    }
 }

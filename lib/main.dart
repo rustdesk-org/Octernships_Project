@@ -15,7 +15,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Elevate priviledge to run a Linux command'),
+      home:
+          const MyHomePage(title: 'Elevate priviledge to run a Linux command'),
     );
   }
 }
