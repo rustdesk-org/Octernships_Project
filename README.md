@@ -4,7 +4,9 @@ This is my submission for the [Rustdesk Octernship]() application.
 
 The task was to "Elevate priviledge to run `ls -la /root/` with Rust, and print the result on the Flutter window".
 
-// to do show image here
+| ![The example](assets/rustdesk-example.jpg) |
+|:--:|
+| *The example image* |
 
 ## My implementation details
 
@@ -14,16 +16,25 @@ The application also allows for the command to be ran without any form of escala
 
 ## Media
 
-// to do add images and recording
+| ![Main page](assets/main-page.png) |
+|:--:|
+| *The main page of the application* |
 
+| ![Authentication Dialog](assets/auth-dialog.png) |
+|:--:|
+| *The authentication dialog* |
+
+| ![Output](assets/output.png) |
+|:--:|
+| *The output after authenticating* |
 ## How to build
 
 - Clone the repository and change directories
 - Ensure you have the dependencies:
-    - Flutter (with Linux desktop support)
-    - a Rust toolchain
-    - the `just` command runner
-    - `flutter_rust_bridge_codegen`
-    
+    - Flutter ([with Linux desktop support](https://docs.flutter.dev/get-started/install/linux))
+    - a [Rust toolchain](https://rustup.rs/)
+    - the [`just` command runner](https://github.com/casey/just)
+    - [`flutter_rust_bridge_codegen`](https://crates.io/crates/flutter_rust_bridge_codegen/)
+
 - Run `just` to ensure the generated bindings are up to date
-- Run `flutter run --release` to run the application
+- Run `flutter run` to run the application
