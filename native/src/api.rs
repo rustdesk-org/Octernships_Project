@@ -43,8 +43,18 @@ pub fn get_username() -> String {
 /// ## Returns:
 /// - A `Vec<EscalationMethod>` containing the applicable escalation methods
 pub fn determine_escalation_methods() -> Vec<EscalationMethod> {
-    // check for polkit, sudo, su in that order
     let mut results = Vec::new();
+
+    let pkexec = Command::new("command")
+        .args(["-v", "pkexec"])
+        .stdout(Stdio::null())
+        .status()
+        .expect("failed to spawn command -v pkcheck");
+
+    if Some(0) == pkexec.code() {
+        // polkit exists
+        results.push(EscalationMethod::Polkit);
+    }
 
     let sudo = Command::new("command")
         .args(["-v", "sudo"])
@@ -55,6 +65,21 @@ pub fn determine_escalation_methods() -> Vec<EscalationMethod> {
     if Some(0) == sudo.code() {
         // sudo exists
         results.push(EscalationMethod::Sudo);
+    }
+
+    let su = Command::new("command")
+        .args(["-v", "su"])
+        .stdout(Stdio::null())
+        .status()
+        .expect("failed to spawn command -v su");
+
+    if Some(0) == su.code() {
+        // sudo exists
+        results.push(EscalationMethod::Su);
+    }
+
+    if results.is_empty() {
+        results.push(EscalationMethod::None);
     }
 
     results

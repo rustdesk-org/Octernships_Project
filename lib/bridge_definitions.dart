@@ -17,7 +17,7 @@ abstract class Native {
   FlutterRustBridgeTaskConstMeta get kGetUsernameConstMeta;
 
   /// Gets the possible privilege escalation methods by checking for the existence of
-  /// `pkexec`, `sudo`, and `su` in that order.
+  /// `pkexec`, `sudo`, and `su`, in that order.
   ///
   /// ## Returns:
   /// - A `Vec<EscalationMethod>` containing the applicable escalation methods
@@ -37,7 +37,7 @@ abstract class Native {
   /// - An `Err<DirectoryListingError>` otherwise
   ///
   /// The error returned is one of the following:
-  /// - `DirectoryListingError::FailedToAuthenticate` if `sudo` exits with 1
+  /// - `DirectoryListingError::FailedToAuthenticate` if `sudo` or `su` exits with 1, or `pkexec` exits with 126 or 127
   /// - `DirectoryListingError::NoSuchDirectory` if `ls` exits with 2 and the error message contains "No such file or directory"
   /// - `DirectoryListingError::PermissionDenied` if `ls` exits with 2 and the error message contains "Permission denied"
   /// - `DirectoryListingError::Unknown` otherwise
