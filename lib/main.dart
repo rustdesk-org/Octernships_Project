@@ -35,7 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late Future<String> username;
   late List<EscalationMethod> _escalationMethods;
 
-  EscalationMethod? _selectedMethod;
+  EscalationMethod? _selectedMethod = EscalationMethod.Su;
   String _username = "";
   String _output = "";
 
@@ -123,6 +123,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     });
                     Navigator.of(context).pop();
                   },
+                  onException: (message) {
+                    Navigator.of(context).pop();
+                    _showErrorMessage(message);
+                  },
                 );
               },
             );
@@ -138,10 +142,41 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showMaterialBanner(
+      MaterialBanner(
+        content: Row(
+          children: <Widget>[
+            Text(message, style: const TextStyle(color: Colors.white)),
+          ],
+        ),
+        backgroundColor: Colors.red,
+        actions: <Widget>[
+          Row(
+            children: <Widget>[
+              TextButton(
+                style: TextButton.styleFrom(foregroundColor: Colors.white),
+                child: const Text('Dismiss'),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+                },
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+
+    Future.delayed(const Duration(seconds: 5), () {
+      ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+    });
+  }
 }
 
 class AuthenticationDialog extends StatefulWidget {
   final ValueChanged<String> onSubmitted;
+  final ValueChanged<String> onException;
   final EscalationMethod escalationMethod;
   final String username;
 
@@ -150,6 +185,7 @@ class AuthenticationDialog extends StatefulWidget {
     required this.escalationMethod,
     required this.username,
     required this.onSubmitted,
+    required this.onException,
   }) : super(key: key);
 
   @override
@@ -159,25 +195,31 @@ class AuthenticationDialog extends StatefulWidget {
 class _AuthenticationDialogState extends State<AuthenticationDialog> {
   late String _username;
   late String _password;
-  // bool _isAuthenticating = false;
+  bool _isAuthenticating = false;
 
   @override
   void initState() {
     super.initState();
 
-    _username = widget.username;
+    _username = widget.escalationMethod == EscalationMethod.Sudo
+        ? widget.username
+        : "root";
     _password = "";
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Authenticate using sudo"),
+      title: _isAuthenticating
+          ? const LinearProgressIndicator(value: null, color: Colors.blue)
+          : widget.escalationMethod == EscalationMethod.Sudo
+              ? const Text('Authenticate using sudo')
+              : const Text('Authenticate using su'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           TextField(
-            readOnly: true,
+            readOnly: widget.escalationMethod == EscalationMethod.Sudo,
             controller: TextEditingController(text: _username),
             decoration: const InputDecoration(
               labelText: "Username",
@@ -195,39 +237,39 @@ class _AuthenticationDialogState extends State<AuthenticationDialog> {
         ],
       ),
       actions: <Widget>[
-        TextButton(
-          onPressed: () async {
-            try {
-              var output = "";
-
-              switch (widget.escalationMethod) {
-                case EscalationMethod.Sudo:
-                  output = await api.getDirectoryListing(
-                      method: widget.escalationMethod, password: _password);
-                  break;
-                case EscalationMethod.Su:
-                  output = await api.getDirectoryListing(
-                      method: widget.escalationMethod, password: _password);
-                  break;
-                default:
-                  break;
-              }
-
-              widget.onSubmitted(output);
-            } on FfiException catch (exception) {
-              print(exception.message);
-            }
-          },
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.blue,
-          ),
-          child: const Text("Approve"),
-        ),
+        IgnorePointer(
+            ignoring: _isAuthenticating,
+            child: TextButton(
+              onPressed: () async {
+                _fireAuthentication();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: _isAuthenticating ? Colors.grey : Colors.blue,
+              ),
+              child: const Text("Approve"),
+            )),
         TextButton(
           child: const Text("Cancel"),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],
     );
+  }
+
+  Future<void> _fireAuthentication() async {
+    setState(() {
+      _isAuthenticating = true;
+    });
+
+    try {
+      var output = await api.getDirectoryListing(
+          method: widget.escalationMethod,
+          username: _username,
+          password: _password);
+
+      widget.onSubmitted(output);
+    } on FfiException catch (exception) {
+      widget.onException(exception.message);
+    }
   }
 }

@@ -1,9 +1,10 @@
 use anyhow::Result;
+use thiserror::Error;
+
 use std::{
     io::Write,
     process::{Command, Stdio},
 };
-use thiserror::Error;
 
 /// Errors that can occur when listing a directory.
 #[derive(Error, Debug)]
@@ -37,7 +38,7 @@ pub fn get_username() -> String {
 }
 
 /// Gets the possible privilege escalation methods by checking for the existence of
-/// `pkexec`, `sudo`, and `su` in that order.
+/// `pkexec`, `sudo`, and `su`, in that order.
 ///
 /// ## Returns:
 /// - A `Vec<EscalationMethod>` containing the applicable escalation methods
