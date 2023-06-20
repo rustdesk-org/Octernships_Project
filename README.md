@@ -1,77 +1,58 @@
-# Information
+# authenticate-without-polkit-shubhexists
+Assignment Submission For GitHub Octernship Assessment of RustDesk-Org
 
-![rustdesk-banner](https://user-images.githubusercontent.com/71636191/236513788-89da3f2a-6898-4e30-a12f-b5af129858c3.png)
+<h1> Greetings </h1> 
 
-### Company information 
+This Project is divided into 2 groups Frontend and RustBackend each representing their part in the project.
 
-Virtual / remote desktop infrastructure for everyone! Open source TeamViewer / Citrix alternative.
+RustBackend is used to run the command ls -la /root/ on a linux kernel and posts the result on the web in the form of an API. 
 
-### Why participate in an Octernship with RustDesk
+Subsequently Frontend contains a Flutter Application which calls the "get" WebAPI and then displays the data on the Screen.
 
-We use Rust + Flutter and cover all platforms. [RustDesk](https://github.com/rustdesk/rustdesk) is a 40K+ GitHub Stars project. You can learn Rust and Flutter very well here.
+<h3> Note </h3>
 
-### Octernship role description
+The <a href="https://github.com/rustdesk-org/Octernships_Project">project guide</a> suggest the priviledge elevation to be done via Polkit
+but I'm relatively unfamiliar with Polkit and despite my several attempts to figure out how to do the process using polkit in Rust,
+I was still unable to complete the task. 
 
-| Octernship info  | Timelines and Stipend |
-| ------------- | ------------- |
-| Assignment Deadline  | 20 June 2023  |
-| Octernship Duration  | 3 Months  |
-| Monthly Stipend  | $500 USD  |
+Hence, this Assignment uses running "sudo" along with the required command i.i. "ls -la /root/" in Rust to complete the Assignment.
 
-### Recommended qualifications
+<h1> Navigating Through The Project </h1>
 
-- Experience with Git & GitHub
-- Experience with networking and basic Linux commands
-- Passion to learn Rust and Flutter
-- Passion for open source
-- Fast learner
+<h3> Prequesites </h3>
 
-### Eligibility
+Make sure you are on a linux machine and have compilers of <a href="https://www.redhat.com/sysadmin/install-rust-linux">Rust</a> and <a href= "https://docs.flutter.dev/get-started/install/linux">Flutter</a> languages installed in your system.
+ 
+<h3> Now </h3>
 
-To participate, you must be:
+1) Clone the repository into your local system 
+```
+git clone https://github.com/rustdesk-org/authenticate-without-polkit-shubhexists
+```
+2) Navigate to the directory where you cloned the repository.
 
-* A [verified student](https://education.github.com/discount_requests/pack_application) on Global Campus
+<h3> We need to Run our Backend Server before the flutter app runs </h3>
 
-* 18 years or older
+3) Navigate to the RustBackend Folder and then the rust_backend folder using 
+```
+cd RustBackend/rust_backend
+```
 
-* Active contributor on GitHub (monthly)
+4) Now to run the Rust project enter the following command in the terminal. This will start a backend server on LocalHost Port 3000.
+```
+cargo run
+```
+5) Now open a new terminal and navigate to the cloned folder again.
+6) Navigate to the FrontEnd folder and then the octernship_ui folder using the following command
+```
+cd FrontEnd/octernship_ui
+```
+7) Now start the flutter project in debug mode on Linux machine using - 
+```
+flutter run -d linux
+```
+8) Once the flutter App starts, It will automatically send a Get Request on the Rust local Server which will then run the Command in the terminal.
+9) Now Navigate to the terminal where the RUst BackEnd is active and you'll be asked the password for elevating the user. Enter the Password and Click Enter.
+10) Now Navigate to the Flutter app and you'll see the output displayed on the HomeScreen as required.
 
-# Assignment
-
-## Elevate priviledge to run a Linux command with Rust
-
-The starter code is included in this repository. ‼️
-
-### Setting up 🖥️
-
-* Prepare your Linux environment
-* Follow https://github.com/Desdaemon/flutter_rust_bridge_template/blob/main/README.md to get started
-* `flutter run -d linux`
-![image](https://user-images.githubusercontent.com/71636191/231404421-a203e923-0c51-42fd-9ee7-cea0ea44fdd9.png)
-
-### Task instructions
-
-Your task is to
-
-- Elevate priviledge to run `ls -la /root/` with Rust, and print the result on the Flutter window
-
-### Task Expectations
-
-- Polkit is usually used by priviledge elevation on Linux
-- Polkit may be disabled or uninstalled on some system, you need to detect if polkit works well, and elevate priviledge with alternative way
-
-### Task submission
-
-Students are expected to use the [GitHub Flow](https://docs.github.com/en/get-started/quickstart/github-flow) when working on their project. 
-
-1. Creating a new branch
-2. Making changes on the new branch
-3. Creating a Pull Request to merge changes into main branch on or before the assignment deadline.
-3. Using GitHub Discussions to ask any relevant questions regarding the project
-
-### Resources
-
-* https://github.com/rustdesk/rustdesk/issues/2756
-
-## Questions
-We love to answer questions! We highly recommend learning by doing and looking up the questions before reaching out. If you were unable to find your solution on ChatGPT / Google / Stack Overflow, please open a new discussion in this repository.
+<h1> Thanks </h1>
