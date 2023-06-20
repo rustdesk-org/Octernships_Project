@@ -1,78 +1,49 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/6xWVd6R2)
-# Information
+# Flutter Rust App with Privilege Elevation
 
-![rustdesk-banner](https://user-images.githubusercontent.com/71636191/236513788-89da3f2a-6898-4e30-a12f-b5af129858c3.png)
+This application incorporates Rust code for executing privileged operations using `sudo` or `polkit` (if available). This combination of Flutter and Rust allows for a powerful and secure application with elevated privileges when necessary.
 
-### Company information 
+## Prerequisites
 
-Virtual / remote desktop infrastructure for everyone! Open source TeamViewer / Citrix alternative.
+Make sure you have the following installed before proceeding:
 
-### Why participate in an Octernship with RustDesk
+- Flutter SDK: [Installation Guide](https://flutter.dev/docs/get-started/install)
+- Rust Toolchain (comes with the compiler): [Installation Guide](https://www.rustup.rs)
+- C/C++ Compiler (for building Rust FFI): Ensure you have a compatible C/C++ compiler for your platform.
+- [flutter-rust-bridge flutter package](https://pub.dev/packages/flutter_rust_bridge)
 
-We use Rust + Flutter and cover all platforms. [RustDesk](https://github.com/rustdesk/rustdesk) is a 40K+ GitHub Stars project. You can learn Rust and Flutter very well here.
+## Getting Started
 
-### Octernship role description
+To run the Flutter Rust app with privilege elevation, follow these steps:
 
-| Octernship info  | Timelines and Stipend |
-| ------------- | ------------- |
-| Assignment Deadline  | 20 June 2023  |
-| Octernship Duration  | 3 Months  |
-| Monthly Stipend  | $500 USD  |
+1. Clone the repository:
 
-### Recommended qualifications
+2. Navigate to the project directory:
 
-- Experience with Git & GitHub
-- Experience with networking and basic Linux commands
-- Passion to learn Rust and Flutter
-- Passion for open source
-- Fast learner
+3. Run the Just command code:
 
-### Eligibility
+   ```bash
+    just gen
+   ```
 
-To participate, you must be:
+4. Build and run the Flutter app:
 
-* A [verified student](https://education.github.com/discount_requests/pack_application) on Global Campus
+   ```bash
+   flutter run
+   ```
 
-* 18 years or older
+## Screenshots
+| ![Welcome Screen](assets/home_ss.png) |
+|:--:|
+| *The welcome screen the user is greeted with when opening the application* |
 
-* Active contributor on GitHub (monthly)
+| !['Show my root folder' Button](assets/get_root.png) |
+|:--:|
+| *This button prompts the user to enter their password. It elevates privilege with the sudo command* |
 
-# Assignment
+| ![Password Input Dialog](assets/sudo.png) |
+|:--:|
+| *The dialog that allows the user input their password* |
 
-## Elevate priviledge to run a Linux command with Rust
-
-The starter code is included in this repository. ‼️
-
-### Setting up 🖥️
-
-* Prepare your Linux environment
-* Follow https://github.com/Desdaemon/flutter_rust_bridge_template/blob/main/README.md to get started
-* `flutter run -d linux`
-![image](https://user-images.githubusercontent.com/71636191/231404421-a203e923-0c51-42fd-9ee7-cea0ea44fdd9.png)
-
-### Task instructions
-
-Your task is to
-
-- Elevate priviledge to run `ls -la /root/` with Rust, and print the result on the Flutter window
-
-### Task Expectations
-
-- Polkit is usually used by priviledge elevation on Linux
-- Polkit may be disabled or uninstalled on some system, you need to detect if polkit works well, and elevate priviledge with alternative way
-
-### Task submission
-
-Students are expected to use the [GitHub Flow](https://docs.github.com/en/get-started/quickstart/github-flow) when working on their project. 
-
-1. Creating a new branch
-2. Making changes on the new branch
-3. Creating a Pull Request to merge changes into main branch on or before the assignment deadline.
-3. Using GitHub Discussions to ask any relevant questions regarding the project
-
-### Resources
-
-* https://github.com/rustdesk/rustdesk/issues/2756
-
-## Questions
-We love to answer questions! We highly recommend learning by doing and looking up the questions before reaching out. If you were unable to find your solution on ChatGPT / Google / Stack Overflow, please open a new discussion in this repository.
+| ![Output](assets/result.png) |
+|:--:|
+| *The results displayed on the screen* |
