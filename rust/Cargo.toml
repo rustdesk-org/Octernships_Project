@@ -3,12 +3,6 @@ name = "rust"
 version = "0.1.0"
 edition = "2021"
 
-[lib]
-crate-type = ["staticlib", "cdylib"]
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-flutter_rust_bridge = "1"
-anyhow = "1.0.57"
-rustyline = "10.1.0"
