@@ -11,6 +11,11 @@ pub extern "C" fn wire_print_root_folder(port_: i64, password: *mut wire_uint_8_
     wire_print_root_folder_impl(port_, password)
 }
 
+#[no_mangle]
+pub extern "C" fn wire_check_polkit(port_: i64) {
+    wire_check_polkit_impl(port_)
+}
+
 // Section: allocate functions
 
 #[no_mangle]

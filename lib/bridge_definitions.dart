@@ -16,7 +16,7 @@ abstract class Native {
   /// Returns a string value.
   ///
   /// ### Example
-  /// ```{rust}
+  /// ```rust
   /// fn main() {
   ///     let username = get_username(); // returns current user's username
   ///     println!("Hello, {}!", username);
@@ -43,4 +43,8 @@ abstract class Native {
   Future<String?> printRootFolder({required String password, dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kPrintRootFolderConstMeta;
+
+  Future<String?> checkPolkit({dynamic hint});
+
+  FlutterRustBridgeTaskConstMeta get kCheckPolkitConstMeta;
 }

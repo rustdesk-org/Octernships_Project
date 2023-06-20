@@ -160,6 +160,20 @@ class NativeWire implements FlutterRustBridgeWireBase {
   late final _wire_print_root_folder = _wire_print_root_folderPtr
       .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
+  void wire_check_polkit(
+    int port_,
+  ) {
+    return _wire_check_polkit(
+      port_,
+    );
+  }
+
+  late final _wire_check_polkitPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_check_polkit');
+  late final _wire_check_polkit =
+      _wire_check_polkitPtr.asFunction<void Function(int)>();
+
   ffi.Pointer<wire_uint_8_list> new_uint_8_list_0(
     int len,
   ) {

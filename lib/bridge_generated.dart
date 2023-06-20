@@ -53,6 +53,22 @@ class NativeImpl implements Native {
         argNames: ["password"],
       );
 
+  Future<String?> checkPolkit({dynamic hint}) {
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) => _platform.inner.wire_check_polkit(port_),
+      parseSuccessData: _wire2api_opt_String,
+      constMeta: kCheckPolkitConstMeta,
+      argValues: [],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kCheckPolkitConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "check_polkit",
+        argNames: [],
+      );
+
   void dispose() {
     _platform.dispose();
   }

@@ -27,12 +27,13 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  blinking_text: ^1.0.2
   cupertino_icons: ^1.0.2
   ffi: ^2.0.1
   flutter:
     sdk: flutter
   flutter_rust_bridge: ^1.45.0
-  get: ^4.6.5
+  google_fonts: null
   meta: ^1.8.0
 
 dev_dependencies:

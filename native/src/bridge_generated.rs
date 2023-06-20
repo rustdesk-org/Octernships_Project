@@ -44,6 +44,16 @@ fn wire_print_root_folder_impl(port_: MessagePort, password: impl Wire2Api<Strin
         },
     )
 }
+fn wire_check_polkit_impl(port_: MessagePort) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "check_polkit",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || move |task_callback| Ok(check_polkit()),
+    )
+}
 // Section: wrapper structs
 
 // Section: static checks

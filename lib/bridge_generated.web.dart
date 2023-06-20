@@ -46,6 +46,8 @@ class NativeWasmModule implements WasmModule {
 
   external dynamic /* void */ wire_print_root_folder(
       NativePortType port_, String password);
+
+  external dynamic /* void */ wire_check_polkit(NativePortType port_);
 }
 
 // Section: WASM wire connector
@@ -59,4 +61,7 @@ class NativeWire extends FlutterRustBridgeWasmWireBase<NativeWasmModule> {
 
   void wire_print_root_folder(NativePortType port_, String password) =>
       wasmModule.wire_print_root_folder(port_, password);
+
+  void wire_check_polkit(NativePortType port_) =>
+      wasmModule.wire_check_polkit(port_);
 }

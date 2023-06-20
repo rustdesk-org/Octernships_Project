@@ -11,6 +11,11 @@ pub fn wire_print_root_folder(port_: MessagePort, password: String) {
     wire_print_root_folder_impl(port_, password)
 }
 
+#[wasm_bindgen]
+pub fn wire_check_polkit(port_: MessagePort) {
+    wire_check_polkit_impl(port_)
+}
+
 // Section: allocate functions
 
 // Section: related functions

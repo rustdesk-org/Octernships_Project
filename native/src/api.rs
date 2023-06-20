@@ -5,7 +5,7 @@ use std::{process::Command, io::Write};
 /// Returns a string value.
 /// 
 /// ### Example
-/// ```{rust}
+/// ```rust
 /// fn main() {
 ///     let username = get_username(); // returns current user's username
 ///     println!("Hello, {}!", username);
@@ -53,6 +53,18 @@ pub fn print_root_folder(password : String) -> Option<String> {
 
     if output.status.code() == Some(0) {
         return Some(String::from_utf8(output.stdout).expect("failed to convert to string"));
+    } else {
+        return None;
+    }
+}
+
+pub fn check_polkit() -> Option<String> {
+    let command = Command::new("pkexec").spawn().expect("failed to execute command");
+
+    let output = command.wait_with_output().expect("failed to wait for child process");
+
+    if output.status.code() == Some(0) {
+        return Some("Successful".to_string());
     } else {
         return None;
     }
