@@ -72,7 +72,7 @@ pub fn determine_escalation_methods() -> Vec<EscalationMethod> {
 /// - An `Err<DirectoryListingError>` otherwise
 ///
 /// The error returned is one of the following:
-/// - `DirectoryListingError::FailedToAuthenticate` if `sudo` exits with 1
+/// - `DirectoryListingError::FailedToAuthenticate` if `sudo` or `su` exits with 1, or `pkexec` exits with 126 or 127
 /// - `DirectoryListingError::NoSuchDirectory` if `ls` exits with 2 and the error message contains "No such file or directory"
 /// - `DirectoryListingError::PermissionDenied` if `ls` exits with 2 and the error message contains "Permission denied"
 /// - `DirectoryListingError::Unknown` otherwise
@@ -82,6 +82,43 @@ pub fn get_directory_listing(
     password: Option<String>,
 ) -> Result<String> {
     match method {
+        EscalationMethod::Polkit => {
+            let pkexec = Command::new("pkexec")
+                .args(["ls", "-la", "/root"])
+                .stdin(Stdio::null())
+                .stderr(Stdio::piped())
+                .stdout(Stdio::piped())
+                .spawn()
+                .expect("failed to run pkexec");
+
+            let output = pkexec.wait_with_output().expect("failed to wait on pkexec");
+
+            match output.status.code() {
+                // ls successful
+                Some(0) => Ok(String::from_utf8(output.stdout)
+                    .expect("failed to convert pkexec output to string")),
+
+                // pkexec failed
+                Some(126 | 127) => Err(DirectoryListingError::FailedToAuthenticate.into()),
+
+                // ls failed
+                Some(2) => {
+                    let stderr = String::from_utf8(output.stderr)
+                        .expect("failed to convert ls output to string");
+
+                    if stderr.contains("Permission denied") {
+                        Err(DirectoryListingError::PermissionDenied.into())
+                    } else if stderr.contains("No such file or directory") {
+                        Err(DirectoryListingError::NoSuchDirectory.into())
+                    } else {
+                        Err(DirectoryListingError::Unknown.into())
+                    }
+                }
+
+                _ => Err(DirectoryListingError::Unknown.into()),
+            }
+        }
+
         EscalationMethod::Sudo => {
             let password = password.expect("password is required for sudo");
 
@@ -111,13 +148,15 @@ pub fn get_directory_listing(
 
                 // ls failed
                 Some(2) => {
-                    if String::from_utf8(output.stderr)
-                        .expect("failed to convert ls output to string")
-                        .contains("Permission denied")
-                    {
+                    let stderr = String::from_utf8(output.stderr)
+                        .expect("failed to convert ls output to string");
+
+                    if stderr.contains("Permission denied") {
                         Err(DirectoryListingError::PermissionDenied.into())
-                    } else {
+                    } else if stderr.contains("No such file or directory") {
                         Err(DirectoryListingError::NoSuchDirectory.into())
+                    } else {
+                        Err(DirectoryListingError::Unknown.into())
                     }
                 }
 
@@ -155,13 +194,15 @@ pub fn get_directory_listing(
 
                 // ls failed
                 Some(2) => {
-                    if String::from_utf8(output.stderr)
-                        .expect("failed to convert ls output to string")
-                        .contains("Permission denied")
-                    {
+                    let stderr = String::from_utf8(output.stderr)
+                        .expect("failed to convert ls output to string");
+
+                    if stderr.contains("Permission denied") {
                         Err(DirectoryListingError::PermissionDenied.into())
-                    } else {
+                    } else if stderr.contains("No such file or directory") {
                         Err(DirectoryListingError::NoSuchDirectory.into())
+                    } else {
+                        Err(DirectoryListingError::Unknown.into())
                     }
                 }
 
@@ -169,6 +210,38 @@ pub fn get_directory_listing(
             }
         }
 
-        _ => todo!(),
+        EscalationMethod::None => {
+            let ls = Command::new("ls")
+                .args(["-la", "/root"])
+                .stdin(Stdio::null())
+                .stderr(Stdio::piped())
+                .stdout(Stdio::piped())
+                .spawn()
+                .expect("failed to run ls");
+
+            let output = ls.wait_with_output().expect("failed to wait on ls");
+
+            match output.status.code() {
+                // ls succeeded
+                Some(0) => Ok(String::from_utf8(output.stdout)
+                    .expect("failed to convert ls output to string")),
+
+                // ls failed
+                Some(2) => {
+                    let stderr = String::from_utf8(output.stderr)
+                        .expect("failed to convert ls output to string");
+
+                    if stderr.contains("Permission denied") {
+                        Err(DirectoryListingError::PermissionDenied.into())
+                    } else if stderr.contains("No such file or directory") {
+                        Err(DirectoryListingError::NoSuchDirectory.into())
+                    } else {
+                        Err(DirectoryListingError::Unknown.into())
+                    }
+                }
+
+                _ => Err(DirectoryListingError::Unknown.into()),
+            }
+        }
     }
 }
