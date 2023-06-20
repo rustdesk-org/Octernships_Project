@@ -143,21 +143,21 @@ class NativeWire implements FlutterRustBridgeWireBase {
   late final _wire_get_username =
       _wire_get_usernamePtr.asFunction<void Function(int)>();
 
-  void wire_print_home_folder(
+  void wire_print_root_folder(
     int port_,
     ffi.Pointer<wire_uint_8_list> password,
   ) {
-    return _wire_print_home_folder(
+    return _wire_print_root_folder(
       port_,
       password,
     );
   }
 
-  late final _wire_print_home_folderPtr = _lookup<
+  late final _wire_print_root_folderPtr = _lookup<
       ffi.NativeFunction<
           ffi.Void Function(ffi.Int64,
-              ffi.Pointer<wire_uint_8_list>)>>('wire_print_home_folder');
-  late final _wire_print_home_folder = _wire_print_home_folderPtr
+              ffi.Pointer<wire_uint_8_list>)>>('wire_print_root_folder');
+  late final _wire_print_root_folder = _wire_print_root_folderPtr
       .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
   ffi.Pointer<wire_uint_8_list> new_uint_8_list_0(

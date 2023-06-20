@@ -31,16 +31,16 @@ fn wire_get_username_impl(port_: MessagePort) {
         move || move |task_callback| Ok(get_username()),
     )
 }
-fn wire_print_home_folder_impl(port_: MessagePort, password: impl Wire2Api<String> + UnwindSafe) {
+fn wire_print_root_folder_impl(port_: MessagePort, password: impl Wire2Api<String> + UnwindSafe) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
-            debug_name: "print_home_folder",
+            debug_name: "print_root_folder",
             port: Some(port_),
             mode: FfiCallMode::Normal,
         },
         move || {
             let api_password = password.wire2api();
-            move |task_callback| Ok(print_home_folder(api_password))
+            move |task_callback| Ok(print_root_folder(api_password))
         },
     )
 }

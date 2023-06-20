@@ -7,8 +7,8 @@ pub extern "C" fn wire_get_username(port_: i64) {
 }
 
 #[no_mangle]
-pub extern "C" fn wire_print_home_folder(port_: i64, password: *mut wire_uint_8_list) {
-    wire_print_home_folder_impl(port_, password)
+pub extern "C" fn wire_print_root_folder(port_: i64, password: *mut wire_uint_8_list) {
+    wire_print_root_folder_impl(port_, password)
 }
 
 // Section: allocate functions

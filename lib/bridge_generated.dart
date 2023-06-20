@@ -36,20 +36,20 @@ class NativeImpl implements Native {
         argNames: [],
       );
 
-  Future<String?> printHomeFolder({required String password, dynamic hint}) {
+  Future<String?> printRootFolder({required String password, dynamic hint}) {
     var arg0 = _platform.api2wire_String(password);
     return _platform.executeNormal(FlutterRustBridgeTask(
-      callFfi: (port_) => _platform.inner.wire_print_home_folder(port_, arg0),
+      callFfi: (port_) => _platform.inner.wire_print_root_folder(port_, arg0),
       parseSuccessData: _wire2api_opt_String,
-      constMeta: kPrintHomeFolderConstMeta,
+      constMeta: kPrintRootFolderConstMeta,
       argValues: [password],
       hint: hint,
     ));
   }
 
-  FlutterRustBridgeTaskConstMeta get kPrintHomeFolderConstMeta =>
+  FlutterRustBridgeTaskConstMeta get kPrintRootFolderConstMeta =>
       const FlutterRustBridgeTaskConstMeta(
-        debugName: "print_home_folder",
+        debugName: "print_root_folder",
         argNames: ["password"],
       );
 

@@ -7,8 +7,8 @@ pub fn wire_get_username(port_: MessagePort) {
 }
 
 #[wasm_bindgen]
-pub fn wire_print_home_folder(port_: MessagePort, password: String) {
-    wire_print_home_folder_impl(port_, password)
+pub fn wire_print_root_folder(port_: MessagePort, password: String) {
+    wire_print_root_folder_impl(port_, password)
 }
 
 // Section: allocate functions

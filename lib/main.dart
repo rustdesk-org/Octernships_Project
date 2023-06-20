@@ -43,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> returnFolder(String password) async {
-    await api.printHomeFolder(password: password).then((value) {
+    await api.printRootFolder(password: password).then((value) {
       setState(() {
         dir = value!;
       });

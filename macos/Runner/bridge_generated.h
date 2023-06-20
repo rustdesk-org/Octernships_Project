@@ -28,7 +28,7 @@ intptr_t init_frb_dart_api_dl(void *obj);
 
 void wire_get_username(int64_t port_);
 
-void wire_print_home_folder(int64_t port_, struct wire_uint_8_list *password);
+void wire_print_root_folder(int64_t port_, struct wire_uint_8_list *password);
 
 struct wire_uint_8_list *new_uint_8_list_0(int32_t len);
 
@@ -37,7 +37,7 @@ void free_WireSyncReturn(WireSyncReturn ptr);
 static int64_t dummy_method_to_enforce_bundling(void) {
     int64_t dummy_var = 0;
     dummy_var ^= ((int64_t) (void*) wire_get_username);
-    dummy_var ^= ((int64_t) (void*) wire_print_home_folder);
+    dummy_var ^= ((int64_t) (void*) wire_print_root_folder);
     dummy_var ^= ((int64_t) (void*) new_uint_8_list_0);
     dummy_var ^= ((int64_t) (void*) free_WireSyncReturn);
     dummy_var ^= ((int64_t) (void*) store_dart_post_cobject);

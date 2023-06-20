@@ -44,7 +44,7 @@ class NativeWasmModule implements WasmModule {
   external NativeWasmModule bind(dynamic thisArg, String moduleName);
   external dynamic /* void */ wire_get_username(NativePortType port_);
 
-  external dynamic /* void */ wire_print_home_folder(
+  external dynamic /* void */ wire_print_root_folder(
       NativePortType port_, String password);
 }
 
@@ -57,6 +57,6 @@ class NativeWire extends FlutterRustBridgeWasmWireBase<NativeWasmModule> {
   void wire_get_username(NativePortType port_) =>
       wasmModule.wire_get_username(port_);
 
-  void wire_print_home_folder(NativePortType port_, String password) =>
-      wasmModule.wire_print_home_folder(port_, password);
+  void wire_print_root_folder(NativePortType port_, String password) =>
+      wasmModule.wire_print_root_folder(port_, password);
 }
