@@ -15,9 +15,10 @@ pub extern "C" fn wire_determine_escalation_methods(port_: i64) {
 pub extern "C" fn wire_get_directory_listing(
     port_: i64,
     method: i32,
+    username: *mut wire_uint_8_list,
     password: *mut wire_uint_8_list,
 ) {
-    wire_get_directory_listing_impl(port_, method, password)
+    wire_get_directory_listing_impl(port_, method, username, password)
 }
 
 // Section: allocate functions

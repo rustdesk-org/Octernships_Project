@@ -18,21 +18,34 @@ abstract class Native {
 
   /// Gets the possible privilege escalation methods by checking for the existence of
   /// `pkexec`, `sudo`, and `su` in that order.
+  ///
+  /// ## Returns:
+  /// - A `Vec<EscalationMethod>` containing the applicable escalation methods
   Future<List<EscalationMethod>> determineEscalationMethods({dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kDetermineEscalationMethodsConstMeta;
 
   /// Gets the contents of `/root` using the specified privilege escalation method.
-  /// - Returns an `Ok<String>` if `ls` has a 0 exit code
-  /// - Returns an `Err<DirectoryListingError>` otherwise
+  ///
+  /// ## Arguments:
+  /// - `method`: The privilege escalation method to use
+  /// - `username`: The username to use for `su` (if applicable)
+  /// - `password`: The password to use for `sudo` or `su` (if applicable)
+  ///
+  /// ## Returns:
+  /// - An `Ok<String>` if `ls` has a 0 exit code
+  /// - An `Err<DirectoryListingError>` otherwise
   ///
   /// The error returned is one of the following:
-  /// - `DirectoryListingError::FailedToAuthenticate` if sudo exits with 1
-  /// - `DirectoryListingError::NoSuchDirectory` if ls exits with 2 and the error message contains "No such file or directory"
-  /// - `DirectoryListingError::PermissionDenied` if ls exits with 2 and the error message contains "Permission denied"
+  /// - `DirectoryListingError::FailedToAuthenticate` if `sudo` exits with 1
+  /// - `DirectoryListingError::NoSuchDirectory` if `ls` exits with 2 and the error message contains "No such file or directory"
+  /// - `DirectoryListingError::PermissionDenied` if `ls` exits with 2 and the error message contains "Permission denied"
   /// - `DirectoryListingError::Unknown` otherwise
   Future<String> getDirectoryListing(
-      {required EscalationMethod method, String? password, dynamic hint});
+      {required EscalationMethod method,
+      String? username,
+      String? password,
+      dynamic hint});
 
   FlutterRustBridgeTaskConstMeta get kGetDirectoryListingConstMeta;
 }

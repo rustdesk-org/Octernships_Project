@@ -54,15 +54,19 @@ class NativeImpl implements Native {
       );
 
   Future<String> getDirectoryListing(
-      {required EscalationMethod method, String? password, dynamic hint}) {
+      {required EscalationMethod method,
+      String? username,
+      String? password,
+      dynamic hint}) {
     var arg0 = api2wire_escalation_method(method);
-    var arg1 = _platform.api2wire_opt_String(password);
+    var arg1 = _platform.api2wire_opt_String(username);
+    var arg2 = _platform.api2wire_opt_String(password);
     return _platform.executeNormal(FlutterRustBridgeTask(
       callFfi: (port_) =>
-          _platform.inner.wire_get_directory_listing(port_, arg0, arg1),
+          _platform.inner.wire_get_directory_listing(port_, arg0, arg1, arg2),
       parseSuccessData: _wire2api_String,
       constMeta: kGetDirectoryListingConstMeta,
-      argValues: [method, password],
+      argValues: [method, username, password],
       hint: hint,
     ));
   }
@@ -70,7 +74,7 @@ class NativeImpl implements Native {
   FlutterRustBridgeTaskConstMeta get kGetDirectoryListingConstMeta =>
       const FlutterRustBridgeTaskConstMeta(
         debugName: "get_directory_listing",
-        argNames: ["method", "password"],
+        argNames: ["method", "username", "password"],
       );
 
   void dispose() {

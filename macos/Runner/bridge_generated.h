@@ -30,7 +30,10 @@ void wire_get_username(int64_t port_);
 
 void wire_determine_escalation_methods(int64_t port_);
 
-void wire_get_directory_listing(int64_t port_, int32_t method, struct wire_uint_8_list *password);
+void wire_get_directory_listing(int64_t port_,
+                                int32_t method,
+                                struct wire_uint_8_list *username,
+                                struct wire_uint_8_list *password);
 
 struct wire_uint_8_list *new_uint_8_list_0(int32_t len);
 

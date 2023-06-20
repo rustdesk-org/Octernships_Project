@@ -38,6 +38,9 @@ pub fn get_username() -> String {
 
 /// Gets the possible privilege escalation methods by checking for the existence of
 /// `pkexec`, `sudo`, and `su` in that order.
+///
+/// ## Returns:
+/// - A `Vec<EscalationMethod>` containing the applicable escalation methods
 pub fn determine_escalation_methods() -> Vec<EscalationMethod> {
     // check for polkit, sudo, su in that order
     let mut results = Vec::new();
@@ -53,19 +56,30 @@ pub fn determine_escalation_methods() -> Vec<EscalationMethod> {
         results.push(EscalationMethod::Sudo);
     }
 
-    return results;
+    results
 }
 
 /// Gets the contents of `/root` using the specified privilege escalation method.
-/// - Returns an `Ok<String>` if `ls` has a 0 exit code
-/// - Returns an `Err<DirectoryListingError>` otherwise
+///
+/// ## Arguments:
+/// - `method`: The privilege escalation method to use
+/// - `username`: The username to use for `su` (if applicable)
+/// - `password`: The password to use for `sudo` or `su` (if applicable)
+///
+/// ## Returns:
+/// - An `Ok<String>` if `ls` has a 0 exit code
+/// - An `Err<DirectoryListingError>` otherwise
 ///
 /// The error returned is one of the following:
-/// - `DirectoryListingError::FailedToAuthenticate` if sudo exits with 1
-/// - `DirectoryListingError::NoSuchDirectory` if ls exits with 2 and the error message contains "No such file or directory"
-/// - `DirectoryListingError::PermissionDenied` if ls exits with 2 and the error message contains "Permission denied"
+/// - `DirectoryListingError::FailedToAuthenticate` if `sudo` exits with 1
+/// - `DirectoryListingError::NoSuchDirectory` if `ls` exits with 2 and the error message contains "No such file or directory"
+/// - `DirectoryListingError::PermissionDenied` if `ls` exits with 2 and the error message contains "Permission denied"
 /// - `DirectoryListingError::Unknown` otherwise
-pub fn get_directory_listing(method: EscalationMethod, password: Option<String>) -> Result<String> {
+pub fn get_directory_listing(
+    method: EscalationMethod,
+    username: Option<String>,
+    password: Option<String>,
+) -> Result<String> {
     match method {
         EscalationMethod::Sudo => {
             let password = password.expect("password is required for sudo");
@@ -92,6 +106,50 @@ pub fn get_directory_listing(method: EscalationMethod, password: Option<String>)
                     .expect("failed to convert sudo output to string")),
 
                 // sudo failed
+                Some(1) => Err(DirectoryListingError::FailedToAuthenticate.into()),
+
+                // ls failed
+                Some(2) => {
+                    if String::from_utf8(output.stderr)
+                        .expect("failed to convert ls output to string")
+                        .contains("Permission denied")
+                    {
+                        Err(DirectoryListingError::PermissionDenied.into())
+                    } else {
+                        Err(DirectoryListingError::NoSuchDirectory.into())
+                    }
+                }
+
+                _ => Err(DirectoryListingError::Unknown.into()),
+            }
+        }
+
+        EscalationMethod::Su => {
+            let username = username.expect("username is required for su");
+            let password = password.expect("password is required for su");
+
+            let mut su = Command::new("su")
+                .args(["-c", "ls -la /root", &username])
+                .stdin(Stdio::piped())
+                .stderr(Stdio::null())
+                .stdout(Stdio::piped())
+                .spawn()
+                .expect("failed to run su");
+
+            su.stdin
+                .take()
+                .expect("failed to take stdin")
+                .write_all(password.as_bytes())
+                .expect("failed to write password to su");
+
+            let output = su.wait_with_output().expect("failed to wait on su");
+
+            match output.status.code() {
+                // ls successful
+                Some(0) => Ok(String::from_utf8(output.stdout)
+                    .expect("failed to convert su output to string")),
+
+                // su failed
                 Some(1) => Err(DirectoryListingError::FailedToAuthenticate.into()),
 
                 // ls failed

@@ -53,7 +53,7 @@ class NativeWasmModule implements WasmModule {
       NativePortType port_);
 
   external dynamic /* void */ wire_get_directory_listing(
-      NativePortType port_, int method, String? password);
+      NativePortType port_, int method, String? username, String? password);
 }
 
 // Section: WASM wire connector
@@ -68,7 +68,7 @@ class NativeWire extends FlutterRustBridgeWasmWireBase<NativeWasmModule> {
   void wire_determine_escalation_methods(NativePortType port_) =>
       wasmModule.wire_determine_escalation_methods(port_);
 
-  void wire_get_directory_listing(
-          NativePortType port_, int method, String? password) =>
-      wasmModule.wire_get_directory_listing(port_, method, password);
+  void wire_get_directory_listing(NativePortType port_, int method,
+          String? username, String? password) =>
+      wasmModule.wire_get_directory_listing(port_, method, username, password);
 }

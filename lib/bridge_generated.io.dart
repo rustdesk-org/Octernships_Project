@@ -165,21 +165,25 @@ class NativeWire implements FlutterRustBridgeWireBase {
   void wire_get_directory_listing(
     int port_,
     int method,
+    ffi.Pointer<wire_uint_8_list> username,
     ffi.Pointer<wire_uint_8_list> password,
   ) {
     return _wire_get_directory_listing(
       port_,
       method,
+      username,
       password,
     );
   }
 
   late final _wire_get_directory_listingPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Void Function(ffi.Int64, ffi.Int32,
+          ffi.Void Function(ffi.Int64, ffi.Int32, ffi.Pointer<wire_uint_8_list>,
               ffi.Pointer<wire_uint_8_list>)>>('wire_get_directory_listing');
-  late final _wire_get_directory_listing = _wire_get_directory_listingPtr
-      .asFunction<void Function(int, int, ffi.Pointer<wire_uint_8_list>)>();
+  late final _wire_get_directory_listing =
+      _wire_get_directory_listingPtr.asFunction<
+          void Function(int, int, ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>)>();
 
   ffi.Pointer<wire_uint_8_list> new_uint_8_list_0(
     int len,

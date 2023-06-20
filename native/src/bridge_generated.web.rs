@@ -12,8 +12,13 @@ pub fn wire_determine_escalation_methods(port_: MessagePort) {
 }
 
 #[wasm_bindgen]
-pub fn wire_get_directory_listing(port_: MessagePort, method: i32, password: Option<String>) {
-    wire_get_directory_listing_impl(port_, method, password)
+pub fn wire_get_directory_listing(
+    port_: MessagePort,
+    method: i32,
+    username: Option<String>,
+    password: Option<String>,
+) {
+    wire_get_directory_listing_impl(port_, method, username, password)
 }
 
 // Section: allocate functions

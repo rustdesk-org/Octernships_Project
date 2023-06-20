@@ -44,6 +44,7 @@ fn wire_determine_escalation_methods_impl(port_: MessagePort) {
 fn wire_get_directory_listing_impl(
     port_: MessagePort,
     method: impl Wire2Api<EscalationMethod> + UnwindSafe,
+    username: impl Wire2Api<Option<String>> + UnwindSafe,
     password: impl Wire2Api<Option<String>> + UnwindSafe,
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
@@ -54,8 +55,9 @@ fn wire_get_directory_listing_impl(
         },
         move || {
             let api_method = method.wire2api();
+            let api_username = username.wire2api();
             let api_password = password.wire2api();
-            move |task_callback| get_directory_listing(api_method, api_password)
+            move |task_callback| get_directory_listing(api_method, api_username, api_password)
         },
     )
 }
