@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Elevate priviledge to run a Linux command'),
+      home: const MyHomePage(title: 'Elevate privilege to run a Linux command'),
     );
   }
 }
@@ -29,6 +29,49 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  late Future<String> _futureFiles;
+  late TextEditingController _passwordController;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordController = TextEditingController();
+    _futureFiles = Future<String>.value('');
+  }
+
+  Future<String> _fetchFiles(String password) async {
+    print("Fetching files");
+    final commandOutput = await api.elevateLsCommand(password: password);
+    return commandOutput;
+  }
+
+  Future<void> _requestPassword(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Permission denied'),
+          content: TextField(
+            controller: _passwordController,
+            obscureText: true,
+            decoration: const InputDecoration(hintText: "Enter your password"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  _futureFiles = _fetchFiles(_passwordController.text);
+                });
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,9 +83,26 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text("ls -la /root/", style: TextStyle(fontSize: 40.0)),
-            const Text('Run above cmd with Rust and print the output here'),
+            FutureBuilder<String>(
+              future: _futureFiles,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasData) {
+                  return Text(snapshot.data!);
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  return SizedBox();
+                }
+              },
+            ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _requestPassword(context),
+        child: const Icon(Icons.lock),
       ),
     );
   }
