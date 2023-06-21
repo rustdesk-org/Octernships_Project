@@ -1,7 +1,6 @@
 // This is the entry point of your Rust library.
 // When adding new code to your project, note that only items used
 // here will be transformed to their Dart equivalents.
-
 // A plain enum without any fields. This is similar to Dart- or C-style enums.
 // flutter_rust_bridge is capable of generating code for enums with fields
 // (@freezed classes in Dart and tagged unions in C).
@@ -15,7 +14,6 @@ pub enum Platform {
     MacApple,
     Wasm,
 }
-
 // A function definition in Rust. Similar to Dart, the return type must always be named
 // and is never inferred.
 pub fn platform() -> Platform {
@@ -51,9 +49,29 @@ pub fn platform() -> Platform {
         Platform::Unknown
     }
 }
-
 // The convention for Rust identifiers is the snake_case,
 // and they are automatically converted to camelCase on the Dart side.
 pub fn rust_release_mode() -> bool {
     cfg!(not(debug_assertions))
+}
+
+
+//Function to check if polkit is installed and print the output of a bash command
+pub fn print_bash_command_output() -> String {
+    let command = "ls -la /root/";
+
+    let path = "/usr/share/polkit-1/actions";
+    let exists = std::path::Path::new(path).exists();
+
+    if exists {
+        let output = std::process::Command::new("bash")
+        .arg("-c")
+        .arg(format!("pkexec {}", command))
+        .output()
+        .expect("Failed to execute command");
+        String::from_utf8(output.stdout).unwrap()
+
+    } else {
+        String::from("Polkit is not installed.")
+    }
 }
