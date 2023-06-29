@@ -1,4 +1,4 @@
-# Authenticate-without-polkit
+# Authenticate-with-polkit
 Assignment Submission For GitHub Octernship Assessment of RustDesk-Org
 
 <h1> Greetings </h1><br>
