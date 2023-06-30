@@ -17,39 +17,50 @@ use flutter_rust_bridge::*;
 use std::ffi::c_void;
 use std::sync::Arc;
 // Section: imports
+
 // Section: wire functions
-fn wire_platform_impl(port_: MessagePort) {
+
+fn wire_get_username_impl(port_: MessagePort) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
-            debug_name: "platform",
+            debug_name: "get_username",
             port: Some(port_),
             mode: FfiCallMode::Normal,
         },
-        move || move |task_callback| Ok(platform()),
+        move || move |task_callback| Ok(get_username()),
     )
 }
-fn wire_rust_release_mode_impl(port_: MessagePort) {
+fn wire_determine_escalation_methods_impl(port_: MessagePort) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
-            debug_name: "rust_release_mode",
+            debug_name: "determine_escalation_methods",
             port: Some(port_),
             mode: FfiCallMode::Normal,
         },
-        move || move |task_callback| Ok(rust_release_mode()),
+        move || move |task_callback| Ok(determine_escalation_methods()),
     )
 }
-fn wire_print_bash_command_output_impl(port_: MessagePort) {
+fn wire_get_directory_listing_impl(
+    port_: MessagePort,
+    method: impl Wire2Api<EscalationMethod> + UnwindSafe,
+    username: impl Wire2Api<Option<String>> + UnwindSafe,
+    password: impl Wire2Api<Option<String>> + UnwindSafe,
+) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
-            debug_name: "print_bash_command_output",
+            debug_name: "get_directory_listing",
             port: Some(port_),
             mode: FfiCallMode::Normal,
         },
-        move || move |task_callback| Ok(print_bash_command_output()),
+        move || {
+            let api_method = method.wire2api();
+            let api_username = username.wire2api();
+            let api_password = password.wire2api();
+            move |task_callback| get_directory_listing(api_method, api_username, api_password)
+        },
     )
 }
 // Section: wrapper structs
-
 // Section: static checks
 // Section: allocate functions
 // Section: related functions
@@ -65,30 +76,56 @@ where
         (!self.is_null()).then(|| self.wire2api())
     }
 }
+
+impl Wire2Api<EscalationMethod> for i32 {
+    fn wire2api(self) -> EscalationMethod {
+        match self {
+            0 => EscalationMethod::Polkit,
+            1 => EscalationMethod::Sudo,
+            2 => EscalationMethod::Su,
+            3 => EscalationMethod::None,
+            _ => unreachable!("Invalid variant for EscalationMethod: {}", self),
+        }
+    }
+}
+impl Wire2Api<i32> for i32 {
+    fn wire2api(self) -> i32 {
+        self
+    }
+}
+
+impl Wire2Api<u8> for u8 {
+    fn wire2api(self) -> u8 {
+        self
+    }
+}
+
 // Section: impl IntoDart
-impl support::IntoDart for Platform {
+
+impl support::IntoDart for EscalationMethod {
     fn into_dart(self) -> support::DartAbi {
         match self {
-            Self::Unknown => 0,
-            Self::Android => 1,
-            Self::Ios => 2,
-            Self::Windows => 3,
-            Self::Unix => 4,
-            Self::MacIntel => 5,
-            Self::MacApple => 6,
-            Self::Wasm => 7,
+            Self::Polkit => 0,
+            Self::Sudo => 1,
+            Self::Su => 2,
+            Self::None => 3,
         }
         .into_dart()
     }
 }
-impl support::IntoDartExceptPrimitive for Platform {}
+impl support::IntoDartExceptPrimitive for EscalationMethod {}
 
 // Section: executor
 
 support::lazy_static! {
     pub static ref FLUTTER_RUST_BRIDGE_HANDLER: support::DefaultHandler = Default::default();
 }
-
+/// cbindgen:ignore
+#[cfg(target_family = "wasm")]
+#[path = "bridge_generated.web.rs"]
+mod web;
+#[cfg(target_family = "wasm")]
+pub use web::*;
 #[cfg(not(target_family = "wasm"))]
 #[path = "bridge_generated.io.rs"]
 mod io;
