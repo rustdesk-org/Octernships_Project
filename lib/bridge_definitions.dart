@@ -56,3 +56,4 @@ enum EscalationMethod {
   Sudo,
   Su,
   None,
+}
