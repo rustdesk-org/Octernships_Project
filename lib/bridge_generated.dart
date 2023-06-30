@@ -8,66 +8,69 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 import 'package:uuid/uuid.dart';
+import 'bridge_generated.io.dart'
+    if (dart.library.html) 'bridge_generated.web.dart';
 
-import 'dart:convert';
-import 'dart:async';
-import 'package:meta/meta.dart';
-import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
-import 'package:uuid/uuid.dart';
-
-import 'dart:ffi' as ffi;
-
-class NativeImpl implements Native {
-  final NativePlatform _platform;
-  factory NativeImpl(ExternalLibrary dylib) =>
-      NativeImpl.raw(NativePlatform(dylib));
-  /// Only valid on web/WASM platforms.
+Expand All
+	@@ -19,56 +20,108 @@ class NativeImpl implements Native {
   factory NativeImpl.wasm(FutureOr<WasmModule> module) =>
       NativeImpl(module as ExternalLibrary);
   NativeImpl.raw(this._platform);
-  Future<Platform> platform({dynamic hint}) {
+  Future<String> getUsername({dynamic hint}) {
     return _platform.executeNormal(FlutterRustBridgeTask(
-      callFfi: (port_) => _platform.inner.wire_platform(port_),
-      parseSuccessData: _wire2api_platform,
-      constMeta: kPlatformConstMeta,
-      argValues: [],
-      hint: hint,
-    ));
-  }
-  FlutterRustBridgeTaskConstMeta get kPlatformConstMeta =>
-      const FlutterRustBridgeTaskConstMeta(
-        debugName: "platform",
-        argNames: [],
-      );
-  Future<bool> rustReleaseMode({dynamic hint}) {
-    return _platform.executeNormal(FlutterRustBridgeTask(
-      callFfi: (port_) => _platform.inner.wire_rust_release_mode(port_),
-      parseSuccessData: _wire2api_bool,
-      constMeta: kRustReleaseModeConstMeta,
-      argValues: [],
-      hint: hint,
-    ));
-  }
-  FlutterRustBridgeTaskConstMeta get kRustReleaseModeConstMeta =>
-      const FlutterRustBridgeTaskConstMeta(
-        debugName: "rust_release_mode",
-        argNames: [],
-      );
-
-  Future<String> printBashCommandOutput({dynamic hint}) {
-    return _platform.executeNormal(FlutterRustBridgeTask(
-      callFfi: (port_) => _platform.inner.wire_print_bash_command_output(port_),
+      callFfi: (port_) => _platform.inner.wire_get_username(port_),
       parseSuccessData: _wire2api_String,
-      constMeta: kPrintBashCommandOutputConstMeta,
+      constMeta: kGetUsernameConstMeta,
       argValues: [],
       hint: hint,
     ));
   }
 
-  FlutterRustBridgeTaskConstMeta get kPrintBashCommandOutputConstMeta =>
+  FlutterRustBridgeTaskConstMeta get kGetUsernameConstMeta =>
       const FlutterRustBridgeTaskConstMeta(
-        debugName: "print_bash_command_output",
+        debugName: "get_username",
         argNames: [],
+      );
+
+  Future<List<EscalationMethod>> determineEscalationMethods({dynamic hint}) {
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) =>
+          _platform.inner.wire_determine_escalation_methods(port_),
+      parseSuccessData: _wire2api_list_escalation_method,
+      constMeta: kDetermineEscalationMethodsConstMeta,
+      argValues: [],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kDetermineEscalationMethodsConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "determine_escalation_methods",
+        argNames: [],
+      );
+
+  Future<String> getDirectoryListing(
+      {required EscalationMethod method,
+      String? username,
+      String? password,
+      dynamic hint}) {
+    var arg0 = api2wire_escalation_method(method);
+    var arg1 = _platform.api2wire_opt_String(username);
+    var arg2 = _platform.api2wire_opt_String(password);
+    return _platform.executeNormal(FlutterRustBridgeTask(
+      callFfi: (port_) =>
+          _platform.inner.wire_get_directory_listing(port_, arg0, arg1, arg2),
+      parseSuccessData: _wire2api_String,
+      constMeta: kGetDirectoryListingConstMeta,
+      argValues: [method, username, password],
+      hint: hint,
+    ));
+  }
+
+  FlutterRustBridgeTaskConstMeta get kGetDirectoryListingConstMeta =>
+      const FlutterRustBridgeTaskConstMeta(
+        debugName: "get_directory_listing",
+        argNames: ["method", "username", "password"],
       );
 
   void dispose() {
@@ -79,15 +82,16 @@ class NativeImpl implements Native {
     return raw as String;
   }
 
-  bool _wire2api_bool(dynamic raw) {
-    return raw as bool;
+  EscalationMethod _wire2api_escalation_method(dynamic raw) {
+    return EscalationMethod.values[raw as int];
   }
+
   int _wire2api_i32(dynamic raw) {
     return raw as int;
   }
 
-  Platform _wire2api_platform(dynamic raw) {
-    return Platform.values[raw as int];
+  List<EscalationMethod> _wire2api_list_escalation_method(dynamic raw) {
+    return (raw as List<dynamic>).map(_wire2api_escalation_method).toList();
   }
 
   int _wire2api_u8(dynamic raw) {
@@ -101,174 +105,19 @@ class NativeImpl implements Native {
 
 // Section: api2wire
 
-// Section: finalizer
-
-class NativePlatform extends FlutterRustBridgeBase<NativeWire> {
-  NativePlatform(ffi.DynamicLibrary dylib) : super(NativeWire(dylib));
-
-// Section: api2wire
-
-// Section: finalizer
-
-// Section: api_fill_to_wire
+@protected
+int api2wire_escalation_method(EscalationMethod raw) {
+  return api2wire_i32(raw.index);
 }
 
-// ignore_for_file: camel_case_types, non_constant_identifier_names, avoid_positional_boolean_parameters, annotate_overrides, constant_identifier_names
-
-// AUTO GENERATED FILE, DO NOT EDIT.
-//
-// Generated by `package:ffigen`.
-// ignore_for_file: type=lint
-
-/// generated by flutter_rust_bridge
-class NativeWire implements FlutterRustBridgeWireBase {
-  @internal
-  late final dartApi = DartApiDl(init_frb_dart_api_dl);
-
-  /// Holds the symbol lookup function.
-  final ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName)
-      _lookup;
-
-  /// The symbols are looked up in [dynamicLibrary].
-  NativeWire(ffi.DynamicLibrary dynamicLibrary)
-      : _lookup = dynamicLibrary.lookup;
-
-  /// The symbols are looked up with [lookup].
-  NativeWire.fromLookup(
-      ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName)
-          lookup)
-      : _lookup = lookup;
-
-  void store_dart_post_cobject(
-    DartPostCObjectFnType ptr,
-  ) {
-    return _store_dart_post_cobject(
-      ptr,
-    );
-  }
-
-  late final _store_dart_post_cobjectPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(DartPostCObjectFnType)>>(
-          'store_dart_post_cobject');
-  late final _store_dart_post_cobject = _store_dart_post_cobjectPtr
-      .asFunction<void Function(DartPostCObjectFnType)>();
-
-  Object get_dart_object(
-    int ptr,
-  ) {
-    return _get_dart_object(
-      ptr,
-    );
-  }
-
-  late final _get_dart_objectPtr =
-      _lookup<ffi.NativeFunction<ffi.Handle Function(ffi.UintPtr)>>(
-          'get_dart_object');
-  late final _get_dart_object =
-      _get_dart_objectPtr.asFunction<Object Function(int)>();
-
-  void drop_dart_object(
-    int ptr,
-  ) {
-    return _drop_dart_object(
-      ptr,
-    );
-  }
-
-  late final _drop_dart_objectPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.UintPtr)>>(
-          'drop_dart_object');
-  late final _drop_dart_object =
-      _drop_dart_objectPtr.asFunction<void Function(int)>();
-
-  int new_dart_opaque(
-    Object handle,
-  ) {
-    return _new_dart_opaque(
-      handle,
-    );
-  }
-
-  late final _new_dart_opaquePtr =
-      _lookup<ffi.NativeFunction<ffi.UintPtr Function(ffi.Handle)>>(
-          'new_dart_opaque');
-  late final _new_dart_opaque =
-      _new_dart_opaquePtr.asFunction<int Function(Object)>();
-
-  int init_frb_dart_api_dl(
-    ffi.Pointer<ffi.Void> obj,
-  ) {
-    return _init_frb_dart_api_dl(
-      obj,
-    );
-  }
-
-  late final _init_frb_dart_api_dlPtr =
-      _lookup<ffi.NativeFunction<ffi.IntPtr Function(ffi.Pointer<ffi.Void>)>>(
-          'init_frb_dart_api_dl');
-  late final _init_frb_dart_api_dl = _init_frb_dart_api_dlPtr
-      .asFunction<int Function(ffi.Pointer<ffi.Void>)>();
-
-  void wire_platform(
-    int port_,
-  ) {
-    return _wire_platform(
-      port_,
-    );
-  }
-
-  late final _wire_platformPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
-          'wire_platform');
-  late final _wire_platform =
-      _wire_platformPtr.asFunction<void Function(int)>();
-
-  void wire_rust_release_mode(
-    int port_,
-  ) {
-    return _wire_rust_release_mode(
-      port_,
-    );
-  }
-
-  late final _wire_rust_release_modePtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
-          'wire_rust_release_mode');
-  late final _wire_rust_release_mode =
-      _wire_rust_release_modePtr.asFunction<void Function(int)>();
-
-  void wire_print_bash_command_output(
-    int port_,
-  ) {
-    return _wire_print_bash_command_output(
-      port_,
-    );
-  }
-
-  late final _wire_print_bash_command_outputPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
-          'wire_print_bash_command_output');
-  late final _wire_print_bash_command_output =
-      _wire_print_bash_command_outputPtr.asFunction<void Function(int)>();
-
-  void free_WireSyncReturn(
-    WireSyncReturn ptr,
-  ) {
-    return _free_WireSyncReturn(
-      ptr,
-    );
-  }
-
-  late final _free_WireSyncReturnPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(WireSyncReturn)>>(
-          'free_WireSyncReturn');
-  late final _free_WireSyncReturn =
-      _free_WireSyncReturnPtr.asFunction<void Function(WireSyncReturn)>();
+@protected
+int api2wire_i32(int raw) {
+  return raw;
 }
 
-// final class _Dart_Handle extends ffi.Opaque {}
+@protected
+int api2wire_u8(int raw) {
+  return raw;
+}
 
-typedef DartPostCObjectFnType = ffi.Pointer<
-    ffi.NativeFunction<
-        ffi.Bool Function(DartPort port_id, ffi.Pointer<ffi.Void> message)>>;
-typedef DartPort = ffi.Int64;
+// Section: finalizer
