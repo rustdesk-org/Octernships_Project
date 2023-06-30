@@ -1,77 +1,272 @@
-// This is the entry point of your Rust library.
-// When adding new code to your project, note that only items used
-// here will be transformed to their Dart equivalents.
-// A plain enum without any fields. This is similar to Dart- or C-style enums.
-// flutter_rust_bridge is capable of generating code for enums with fields
-// (@freezed classes in Dart and tagged unions in C).
-pub enum Platform {
+use anyhow::Result;
+use thiserror::Error;
+
+use std::{
+    io::Write,
+    process::{Command, Stdio},
+};
+
+/// Errors that can occur when listing a directory.
+#[derive(Error, Debug)]
+pub enum DirectoryListingError {
+    #[error("Authentication failed.")]
+    FailedToAuthenticate,
+    #[error("The directory was unable to be found.")]
+    NoSuchDirectory,
+    #[error("Inadequate permissions.")]
+    PermissionDenied,
+    #[error("An unknown error occured.")]
     Unknown,
-    Android,
-    Ios,
-    Windows,
-    Unix,
-    MacIntel,
-    MacApple,
-    Wasm,
-}
-// A function definition in Rust. Similar to Dart, the return type must always be named
-// and is never inferred.
-pub fn platform() -> Platform {
-    // This is a macro, a special expression that expands into code. In Rust, all macros
-    // end with an exclamation mark and can be invoked with all kinds of brackets (parentheses,
-    // brackets and curly braces). However, certain conventions exist, for example the
-    // vector macro is almost always invoked as vec![..].
-    //
-    // The cfg!() macro returns a boolean value based on the current compiler configuration.
-    // When attached to expressions (#[cfg(..)] form), they show or hide the expression at compile time.
-    // Here, however, they evaluate to runtime values, which may or may not be optimized out
-    // by the compiler. A variety of configurations are demonstrated here which cover most of
-    // the modern oeprating systems. Try running the Flutter application on different machines
-    // and see if it matches your expected OS.
-    //
-    // Furthermore, in Rust, the last expression in a function is the return value and does
-    // not have the trailing semicolon. This entire if-else chain forms a single expression.
-    if cfg!(windows) {
-        Platform::Windows
-    } else if cfg!(target_os = "android") {
-        Platform::Android
-    } else if cfg!(target_os = "ios") {
-        Platform::Ios
-    } else if cfg!(all(target_os = "macos", target_arch = "aarch64")) {
-        Platform::MacApple
-    } else if cfg!(target_os = "macos") {
-        Platform::MacIntel
-    } else if cfg!(target_family = "wasm") {
-        Platform::Wasm
-    } else if cfg!(unix) {
-        Platform::Unix
-    } else {
-        Platform::Unknown
-    }
-}
-// The convention for Rust identifiers is the snake_case,
-// and they are automatically converted to camelCase on the Dart side.
-pub fn rust_release_mode() -> bool {
-    cfg!(not(debug_assertions))
 }
 
+/// Possible methods for privilege escalation.
+#[derive(Copy, Clone)]
+pub enum EscalationMethod {
+    Polkit,
+    Sudo,
+    Su,
+    None,
+}
 
-//Function to check if polkit is installed and print the output of a bash command
-pub fn print_bash_command_output() -> String {
-    let command = "ls -la /root/";
-
-    let path = "/usr/share/polkit-1/actions";
-    let exists = std::path::Path::new(path).exists();
-
-    if exists {
-        let output = std::process::Command::new("bash")
-        .arg("-c")
-        .arg(format!("pkexec {}", command))
+/// Gets the current user's username.
+pub fn get_username() -> String {
+    let output = Command::new("whoami")
         .output()
-        .expect("Failed to execute command");
-        String::from_utf8(output.stdout).unwrap()
+        .expect("failed to execute whoami");
 
-    } else {
-        String::from("Polkit is not installed.")
+    String::from_utf8(output.stdout).expect("failed to convert whoami output to string")
+}
+
+/// Gets the possible privilege escalation methods by checking for the existence of
+/// `pkexec`, `sudo`, and `su`, in that order.
+///
+/// ## Returns:
+/// - A `Vec<EscalationMethod>` containing the applicable escalation methods
+pub fn determine_escalation_methods() -> Vec<EscalationMethod> {
+    let mut results = Vec::new();
+
+    let pkexec = Command::new("command")
+        .args(["-v", "pkexec"])
+        .stdout(Stdio::null())
+        .status()
+        .expect("failed to spawn command -v pkcheck");
+
+    if Some(0) == pkexec.code() {
+        // polkit exists
+        results.push(EscalationMethod::Polkit);
+    }
+
+    let sudo = Command::new("command")
+        .args(["-v", "sudo"])
+        .stdout(Stdio::null())
+        .status()
+        .expect("failed to spawn command -v sudo");
+
+    if Some(0) == sudo.code() {
+        // sudo exists
+        results.push(EscalationMethod::Sudo);
+    }
+
+    let su = Command::new("command")
+        .args(["-v", "su"])
+        .stdout(Stdio::null())
+        .status()
+        .expect("failed to spawn command -v su");
+
+    if Some(0) == su.code() {
+        // sudo exists
+        results.push(EscalationMethod::Su);
+    }
+
+    if results.is_empty() {
+        results.push(EscalationMethod::None);
+    }
+
+    results
+}
+
+/// Gets the contents of `/root` using the specified privilege escalation method.
+///
+/// ## Arguments:
+/// - `method`: The privilege escalation method to use
+/// - `username`: The username to use for `su` (if applicable)
+/// - `password`: The password to use for `sudo` or `su` (if applicable)
+///
+/// ## Returns:
+/// - An `Ok<String>` if `ls` has a 0 exit code
+/// - An `Err<DirectoryListingError>` otherwise
+///
+/// The error returned is one of the following:
+/// - `DirectoryListingError::FailedToAuthenticate` if `sudo` or `su` exits with 1, or `pkexec` exits with 126 or 127
+/// - `DirectoryListingError::NoSuchDirectory` if `ls` exits with 2 and the error message contains "No such file or directory"
+/// - `DirectoryListingError::PermissionDenied` if `ls` exits with 2 and the error message contains "Permission denied"
+/// - `DirectoryListingError::Unknown` otherwise
+pub fn get_directory_listing(
+    method: EscalationMethod,
+    username: Option<String>,
+    password: Option<String>,
+) -> Result<String> {
+    match method {
+        EscalationMethod::Polkit => {
+            let pkexec = Command::new("pkexec")
+                .args(["ls", "-la", "/root"])
+                .stdin(Stdio::null())
+                .stderr(Stdio::piped())
+                .stdout(Stdio::piped())
+                .spawn()
+                .expect("failed to run pkexec");
+
+            let output = pkexec.wait_with_output().expect("failed to wait on pkexec");
+
+            match output.status.code() {
+                // ls successful
+                Some(0) => Ok(String::from_utf8(output.stdout)
+                    .expect("failed to convert pkexec output to string")),
+
+                // pkexec failed
+                Some(126 | 127) => Err(DirectoryListingError::FailedToAuthenticate.into()),
+
+                // ls failed
+                Some(2) => {
+                    let stderr = String::from_utf8(output.stderr)
+                        .expect("failed to convert ls output to string");
+
+                    if stderr.contains("Permission denied") {
+                        Err(DirectoryListingError::PermissionDenied.into())
+                    } else if stderr.contains("No such file or directory") {
+                        Err(DirectoryListingError::NoSuchDirectory.into())
+                    } else {
+                        Err(DirectoryListingError::Unknown.into())
+                    }
+                }
+
+                _ => Err(DirectoryListingError::Unknown.into()),
+            }
+        }
+
+        EscalationMethod::Sudo => {
+            let password = password.expect("password is required for sudo");
+
+            let mut sudo = Command::new("sudo")
+                .args(["-k", "-S", "ls", "-la", "/root"])
+                .stdin(Stdio::piped())
+                .stderr(Stdio::piped())
+                .stdout(Stdio::piped())
+                .spawn()
+                .expect("failed to run sudo");
+
+            sudo.stdin
+                .take()
+                .expect("failed to take stdin")
+                .write_all(password.as_bytes())
+                .expect("failed to write password to sudo");
+
+            let output = sudo.wait_with_output().expect("failed to wait on sudo");
+
+            match output.status.code() {
+                // ls successful
+                Some(0) => Ok(String::from_utf8(output.stdout)
+                    .expect("failed to convert sudo output to string")),
+
+                // sudo failed
+                Some(1) => Err(DirectoryListingError::FailedToAuthenticate.into()),
+
+                // ls failed
+                Some(2) => {
+                    let stderr = String::from_utf8(output.stderr)
+                        .expect("failed to convert ls output to string");
+
+                    if stderr.contains("Permission denied") {
+                        Err(DirectoryListingError::PermissionDenied.into())
+                    } else if stderr.contains("No such file or directory") {
+                        Err(DirectoryListingError::NoSuchDirectory.into())
+                    } else {
+                        Err(DirectoryListingError::Unknown.into())
+                    }
+                }
+
+                _ => Err(DirectoryListingError::Unknown.into()),
+            }
+        }
+
+        EscalationMethod::Su => {
+            let username = username.expect("username is required for su");
+            let password = password.expect("password is required for su");
+
+            let mut su = Command::new("su")
+                .args(["-c", "ls -la /root", &username])
+                .stdin(Stdio::piped())
+                .stderr(Stdio::null())
+                .stdout(Stdio::piped())
+                .spawn()
+                .expect("failed to run su");
+
+            su.stdin
+                .take()
+                .expect("failed to take stdin")
+                .write_all(password.as_bytes())
+                .expect("failed to write password to su");
+
+            let output = su.wait_with_output().expect("failed to wait on su");
+
+            match output.status.code() {
+                // ls successful
+                Some(0) => Ok(String::from_utf8(output.stdout)
+                    .expect("failed to convert su output to string")),
+
+                // su failed
+                Some(1) => Err(DirectoryListingError::FailedToAuthenticate.into()),
+
+                // ls failed
+                Some(2) => {
+                    let stderr = String::from_utf8(output.stderr)
+                        .expect("failed to convert ls output to string");
+
+                    if stderr.contains("Permission denied") {
+                        Err(DirectoryListingError::PermissionDenied.into())
+                    } else if stderr.contains("No such file or directory") {
+                        Err(DirectoryListingError::NoSuchDirectory.into())
+                    } else {
+                        Err(DirectoryListingError::Unknown.into())
+                    }
+                }
+
+                _ => Err(DirectoryListingError::Unknown.into()),
+            }
+        }
+
+        EscalationMethod::None => {
+            let ls = Command::new("ls")
+                .args(["-la", "/root"])
+                .stdin(Stdio::null())
+                .stderr(Stdio::piped())
+                .stdout(Stdio::piped())
+                .spawn()
+                .expect("failed to run ls");
+
+            let output = ls.wait_with_output().expect("failed to wait on ls");
+
+            match output.status.code() {
+                // ls succeeded
+                Some(0) => Ok(String::from_utf8(output.stdout)
+                    .expect("failed to convert ls output to string")),
+
+                // ls failed
+                Some(2) => {
+                    let stderr = String::from_utf8(output.stderr)
+                        .expect("failed to convert ls output to string");
+
+                    if stderr.contains("Permission denied") {
+                        Err(DirectoryListingError::PermissionDenied.into())
+                    } else if stderr.contains("No such file or directory") {
+                        Err(DirectoryListingError::NoSuchDirectory.into())
+                    } else {
+                        Err(DirectoryListingError::Unknown.into())
+                    }
+                }
+
+                _ => Err(DirectoryListingError::Unknown.into()),
+            }
+        }
     }
 }
