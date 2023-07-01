@@ -15,7 +15,7 @@ pub enum DirectoryListingError {
     NoSuchDirectory,
     #[error("Inadequate permissions.")]
     PermissionDenied,
-    #[error("An unknown error occured.")]
+    #[error("An unknown error occurred.")]
     Unknown,
 }
 
@@ -41,7 +41,7 @@ pub fn get_username() -> String {
 /// `pkexec`, `sudo`, and `su`, in that order.
 ///
 /// ## Returns:
-/// - A `Vec<EscalationMethod>` containing the applicable escalation methods
+/// - A `Vec<EscalationMethod>` containing the applicable escalation methods.
 pub fn determine_escalation_methods() -> Vec<EscalationMethod> {
     let mut results = Vec::new();
 
@@ -85,22 +85,6 @@ pub fn determine_escalation_methods() -> Vec<EscalationMethod> {
     results
 }
 
-/// Gets the contents of `/root` using the specified privilege escalation method.
-///
-/// ## Arguments:
-/// - `method`: The privilege escalation method to use
-/// - `username`: The username to use for `su` (if applicable)
-/// - `password`: The password to use for `sudo` or `su` (if applicable)
-///
-/// ## Returns:
-/// - An `Ok<String>` if `ls` has a 0 exit code
-/// - An `Err<DirectoryListingError>` otherwise
-///
-/// The error returned is one of the following:
-/// - `DirectoryListingError::FailedToAuthenticate` if `sudo` or `su` exits with 1, or `pkexec` exits with 126 or 127
-/// - `DirectoryListingError::NoSuchDirectory` if `ls` exits with 2 and the error message contains "No such file or directory"
-/// - `DirectoryListingError::PermissionDenied` if `ls` exits with 2 and the error message contains "Permission denied"
-/// - `DirectoryListingError::Unknown` otherwise
 pub fn get_directory_listing(
     method: EscalationMethod,
     username: Option<String>,
@@ -236,18 +220,13 @@ pub fn get_directory_listing(
         }
 
         EscalationMethod::None => {
-            let ls = Command::new("ls")
+            let output = Command::new("ls")
                 .args(["-la", "/root"])
-                .stdin(Stdio::null())
-                .stderr(Stdio::piped())
-                .stdout(Stdio::piped())
-                .spawn()
-                .expect("failed to run ls");
-
-            let output = ls.wait_with_output().expect("failed to wait on ls");
+                .output()
+                .expect("failed to execute ls");
 
             match output.status.code() {
-                // ls succeeded
+                // ls successful
                 Some(0) => Ok(String::from_utf8(output.stdout)
                     .expect("failed to convert ls output to string")),
 
