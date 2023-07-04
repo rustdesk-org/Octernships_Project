@@ -10,7 +10,7 @@ import 'package:meta/meta.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 import 'package:uuid/uuid.dart';
 
-abstract class FlutterRustBridgeExample {
+abstract class Native {
   Future<String> passingComplexStructs(
       {required String password, dynamic hint});
 

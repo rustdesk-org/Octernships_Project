@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'ffi.dart' if (dart.library.html) 'ffi_web.dart';
+import 'ffi.io.dart' if (dart.library.html) 'ffi.web.dart';
+export 'ffi.io.dart' if (dart.library.html) 'ffi.web.dart' show api;
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -11,39 +10,100 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Octernships Project',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Sudo Command Output - ls -la /root/'),
+        ),
+        body: const _MyAppContent(),
       ),
-      home: const MyHomePage(title: 'Elevate priviledge to run a Linux command'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-  final String title;
+class _MyAppContent extends StatefulWidget {
+  const _MyAppContent({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<_MyAppContent> createState() => _MyAppContentState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyAppContentState extends State<_MyAppContent> {
+  String? exampleText;
+  late TextEditingController _passwordController;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text("ls -la /root/", style: TextStyle(fontSize: 40.0)),
-            const Text('Run above cmd with Rust and print the output here'),
-          ],
-        ),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              _showPasswordDialog();
+            },
+            child: const Text('Execute sudo command'),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            exampleText ?? 'No command executed yet.',
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
+  }
+
+  Future<void> _showPasswordDialog() async {
+    final password = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Enter Sudo Password'),
+          content: TextField(
+            controller: _passwordController,
+            obscureText: true,
+            decoration: const InputDecoration(hintText: 'Password'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                final password = _passwordController.text;
+                Navigator.pop(context, password);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (password != null && password.isNotEmpty) {
+      _callExampleFfiTwo(password);
+    }
+  }
+
+  Future<void> _callExampleFfiTwo(String password) async {
+    final receivedText = await api.passingComplexStructs(password: password);
+    if (mounted) {
+      setState(() {
+        exampleText = receivedText;
+      });
+    }
   }
 }
