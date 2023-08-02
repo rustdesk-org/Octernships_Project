@@ -70,7 +70,7 @@ class _MyAppContentState extends State<_MyAppContent> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Enter Sudo Password'),
+          title: const Text('Enter Sudo Password : '),
           content: TextField(
             controller: _passwordController,
             obscureText: true,
