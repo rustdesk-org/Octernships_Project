@@ -2,6 +2,10 @@
 // When adding new code to your project, note that only items used
 // here will be transformed to their Dart equivalents.
 
+use std::process::Command;
+use std::str;
+use std::{fs};
+
 // A plain enum without any fields. This is similar to Dart- or C-style enums.
 // flutter_rust_bridge is capable of generating code for enums with fields
 // (@freezed classes in Dart and tagged unions in C).
@@ -56,4 +60,29 @@ pub fn platform() -> Platform {
 // and they are automatically converted to camelCase on the Dart side.
 pub fn rust_release_mode() -> bool {
     cfg!(not(debug_assertions))
+}
+
+
+pub fn elevate_ls_command( password: String) -> String {
+
+        let echo_cmd = format!("echo {}", password);
+        let output = Command::new("sh")
+                .arg("-c")
+                .arg(format!("{} | sudo -S ls -la /root > /tmp/output.txt", echo_cmd))
+                .output();
+
+
+        match output {
+            Ok(output) => {
+                let result = fs::read_to_string("/tmp/output.txt")
+                .expect("Failed to read output file");
+                println!("ls command result: {}", result);
+                result
+            }
+            Err(error) => {
+                eprintln!("Failed to execute command: {}", error);
+                String::new() // Return an empty string or handle the error accordingly
+            }
+        }
+    
 }

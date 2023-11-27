@@ -1,3 +1,4 @@
+[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/6xWVd6R2)
 # Information
 
 ![rustdesk-banner](https://user-images.githubusercontent.com/71636191/236513788-89da3f2a-6898-4e30-a12f-b5af129858c3.png)
@@ -47,7 +48,7 @@ The starter code is included in this repository. ‼️
 * Prepare your Linux environment
 * Follow https://github.com/Desdaemon/flutter_rust_bridge_template/blob/main/README.md to get started
 * `flutter run -d linux`
-![image](https://user-images.githubusercontent.com/71636191/231404421-a203e923-0c51-42fd-9ee7-cea0ea44fdd9.png)
+![image](./AssignmentSolution.png)
 
 ### Task instructions
 
