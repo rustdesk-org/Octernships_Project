@@ -11,11 +11,9 @@ import 'package:uuid/uuid.dart';
 import 'bridge_generated.dart';
 export 'bridge_generated.dart';
 
-class FlutterRustBridgeExamplePlatform
-    extends FlutterRustBridgeBase<FlutterRustBridgeExampleWire>
+class NativePlatform extends FlutterRustBridgeBase<NativeWire>
     with FlutterRustBridgeSetupMixin {
-  FlutterRustBridgeExamplePlatform(FutureOr<WasmModule> dylib)
-      : super(FlutterRustBridgeExampleWire(dylib)) {
+  NativePlatform(FutureOr<WasmModule> dylib) : super(NativeWire(dylib)) {
     setupMixinConstructor();
   }
   Future<void> setup() => inner.init;
@@ -37,24 +35,22 @@ class FlutterRustBridgeExamplePlatform
 // Section: WASM wire module
 
 @JS('wasm_bindgen')
-external FlutterRustBridgeExampleWasmModule get wasmModule;
+external NativeWasmModule get wasmModule;
 
 @JS()
 @anonymous
-class FlutterRustBridgeExampleWasmModule implements WasmModule {
+class NativeWasmModule implements WasmModule {
   external Object /* Promise */ call([String? moduleName]);
-  external FlutterRustBridgeExampleWasmModule bind(
-      dynamic thisArg, String moduleName);
+  external NativeWasmModule bind(dynamic thisArg, String moduleName);
   external dynamic /* void */ wire_passing_complex_structs(
       NativePortType port_, String password);
 }
 
 // Section: WASM wire connector
 
-class FlutterRustBridgeExampleWire
-    extends FlutterRustBridgeWasmWireBase<FlutterRustBridgeExampleWasmModule> {
-  FlutterRustBridgeExampleWire(FutureOr<WasmModule> module)
-      : super(WasmModule.cast<FlutterRustBridgeExampleWasmModule>(module));
+class NativeWire extends FlutterRustBridgeWasmWireBase<NativeWasmModule> {
+  NativeWire(FutureOr<WasmModule> module)
+      : super(WasmModule.cast<NativeWasmModule>(module));
 
   void wire_passing_complex_structs(NativePortType port_, String password) =>
       wasmModule.wire_passing_complex_structs(port_, password);

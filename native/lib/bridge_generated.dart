@@ -11,15 +11,15 @@ import 'package:uuid/uuid.dart';
 import 'bridge_generated.io.dart'
     if (dart.library.html) 'bridge_generated.web.dart';
 
-class FlutterRustBridgeExampleImpl implements FlutterRustBridgeExample {
-  final FlutterRustBridgeExamplePlatform _platform;
-  factory FlutterRustBridgeExampleImpl(ExternalLibrary dylib) =>
-      FlutterRustBridgeExampleImpl.raw(FlutterRustBridgeExamplePlatform(dylib));
+class NativeImpl implements Native {
+  final NativePlatform _platform;
+  factory NativeImpl(ExternalLibrary dylib) =>
+      NativeImpl.raw(NativePlatform(dylib));
 
   /// Only valid on web/WASM platforms.
-  factory FlutterRustBridgeExampleImpl.wasm(FutureOr<WasmModule> module) =>
-      FlutterRustBridgeExampleImpl(module as ExternalLibrary);
-  FlutterRustBridgeExampleImpl.raw(this._platform);
+  factory NativeImpl.wasm(FutureOr<WasmModule> module) =>
+      NativeImpl(module as ExternalLibrary);
+  NativeImpl.raw(this._platform);
   Future<String> passingComplexStructs(
       {required String password, dynamic hint}) {
     var arg0 = _platform.api2wire_String(password);
