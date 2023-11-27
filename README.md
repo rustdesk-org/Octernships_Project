@@ -4,27 +4,25 @@
 
 ### Company information 
 
-An open-source remote desktop, and alternative to TeamViewer.
+Virtual / remote desktop infrastructure for everyone! Open source TeamViewer / Citrix alternative.
 
 ### Why participate in an Octernship with RustDesk
 
-- [RustDesk](https://github.com/rustdesk/rustdesk) is a 50K+ GitHub Stars project built with Rust and Flutter.
-- We are also now building the next-generation RMM / MSP open source platform with Next.js and Rust.
+We use Rust + Flutter and cover all platforms. [RustDesk](https://github.com/rustdesk/rustdesk) is a 40K+ GitHub Stars project. You can learn Rust and Flutter very well here.
 
 ### Octernship role description
 
 | Octernship info  | Timelines and Stipend |
 | ------------- | ------------- |
-| Assignment Deadline  | 15 Dec 2023  |
+| Assignment Deadline  | 20 June 2023  |
 | Octernship Duration  | 3 Months  |
 | Monthly Stipend  | $500 USD  |
 
 ### Recommended qualifications
 
 - Experience with Git & GitHub
-- Experience with Next.js
-- Good at UI
-- Passion to learn Rust
+- Experience with networking and basic Linux commands
+- Passion to learn Rust and Flutter
 - Passion for open source
 - Fast learner
 
@@ -40,36 +38,27 @@ To participate, you must be:
 
 # Assignment
 
-## Add login session management 
+## Elevate priviledge to run a Linux command with Rust
 
 The starter code is included in this repository. ‼️
 
 ### Setting up 🖥️
 
-* Prepare your Next.js environment
-* This repo is initialized with [https://create.t3.gg/](https://create.t3.gg/), [https://ui.shadcn.com/](https://ui.shadcn.com/) is used
-* Rename `.env.example` to `.env`, and modify content in it, and set up postgres database
-* `pnpm install`
-* `pnpm dev`
+* Prepare your Linux environment
+* Follow https://github.com/Desdaemon/flutter_rust_bridge_template/blob/main/README.md to get started
+* `flutter run -d linux`
+![image](https://user-images.githubusercontent.com/71636191/231404421-a203e923-0c51-42fd-9ee7-cea0ea44fdd9.png)
 
 ### Task instructions
 
-Your task is to add login session management like Google device, https://myaccount.google.com/device-activity
+Your task is to
 
-![image](https://github.com/rustdesk-org/Octernships_Project/assets/71636191/523a056d-dfba-4a01-bc81-e8d01afe8bda)
-
-- Ability to force one session log out
-- The UI should follow our current overall style
-- New location login notification
-
-![image](https://github.com/rustdesk-org/Octernships_Project/assets/71636191/c1f79881-9750-42fd-a1ab-68becca9171f)
-
+- Elevate priviledge to run `ls -la /root/` with Rust, and print the result on the Flutter window
 
 ### Task Expectations
 
-- Login sessions page
-- New location login notification via email
-- Decent UI design
+- Polkit is usually used by priviledge elevation on Linux
+- Polkit may be disabled or uninstalled on some system, you need to detect if polkit works well, and elevate priviledge with alternative way
 
 ### Task submission
 
@@ -82,8 +71,7 @@ Students are expected to use the [GitHub Flow](https://docs.github.com/en/get-st
 
 ### Resources
 
-* [https://create.t3.gg/](https://create.t3.gg/)
-* [https://ui.shadcn.com/](https://ui.shadcn.com/)
+* https://github.com/rustdesk/rustdesk/issues/2756
 
 ## Questions
 We love to answer questions! We highly recommend learning by doing and looking up the questions before reaching out. If you were unable to find your solution on ChatGPT / Google / Stack Overflow, please open a new discussion in this repository.
